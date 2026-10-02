@@ -106,7 +106,9 @@ export function useImportPdf(onDone?: (plan: DietPlan) => void) {
 
   const importFromUri = useCallback(
     (uri: string) => {
-      const name = decodeURIComponent(uri.split('/').pop() ?? 'Piano alimentare.pdf');
+      // Android's content:// URIs end in an id, not a file name.
+      const last = decodeURIComponent(uri.split('?')[0].split('/').pop() ?? '');
+      const name = /\.(pdf|docx?)$/i.test(last) ? last : 'Piano alimentare.pdf';
       void runImport(uri, name);
     },
     [runImport],

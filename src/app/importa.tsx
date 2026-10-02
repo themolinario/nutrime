@@ -37,7 +37,7 @@ export default function ImportScreen() {
   const onDone = useCallback(() => router.replace('/oggi'), []);
   const { ready, stage, error, busy, importFromUri, importFromPicker } = useImportPdf(onDone);
 
-  useIncomingPdf(importFromUri);
+  useIncomingPdf(importFromUri, { consume: true });
 
   return (
     <View style={styles.root}>
