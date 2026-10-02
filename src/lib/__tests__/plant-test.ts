@@ -1,7 +1,8 @@
 import { addDays, weekdayOf } from '../dates';
 import type { HistoryDay } from '../history';
 import { historyStats } from '../history';
-import { celebrationFor, plantStatus, stageOf } from '../plant';
+import { growOf, missingFor, speciesOf, SPECIES, type Garden } from '../garden';
+import { celebrationFor, growingStatus, plantStatus } from '../plant';
 
 const TODAY = '2026-10-01'; // a Thursday
 
@@ -50,46 +51,96 @@ describe('plantStatus', () => {
   });
 });
 
+const SINCE = addDays(TODAY, -120);
+const sunflower = { species: 'girasole', since: SINCE } as const; // 21 days
+
 describe('celebrationFor', () => {
   it('plants a seed on the first day', () => {
-    const c = celebrationFor(days('x'), TODAY);
-    expect(c).toMatchObject({ streak: 1, from: 0, to: 1, revive: false, lit: false, special: null });
+    const c = celebrationFor(days('x'), TODAY, sunflower);
+    expect(c).toMatchObject({ progress: 1, goal: 21, from: 0, to: 1, revive: false, grown: false });
     expect(c.title).toBe('Seme piantato!');
   });
 
-  it('blooms on the fifth day and lights up from the sixth', () => {
-    expect(celebrationFor(days('xxxxx'), TODAY)).toMatchObject({ from: 4, to: 5, lit: false });
-    expect(celebrationFor(days('xxxxxx'), TODAY)).toMatchObject({ from: 5, to: 5, lit: true, special: null });
+  it('grows a little every day and shows the bud on the day before the end', () => {
+    const grows = [1, 2, 10, 20].map((n) => celebrationFor(days('x'.repeat(n)), TODAY, sunflower).to);
+    expect(grows[0]).toBe(1);
+    expect(grows[1]).toBeGreaterThan(1);
+    expect(grows[2]).toBeGreaterThan(grows[1]);
+    expect(grows[3]).toBe(4);
   });
 
-  it('puts on a different show every five days, in turn', () => {
-    const show = (n: number) => celebrationFor(days('x'.repeat(n)), TODAY).special;
-    expect([10, 15, 20, 25, 30].map(show)).toEqual([
-      'butterflies',
-      'fruits',
-      'rainbow',
-      'stars',
-      'butterflies',
-    ]);
+  it('is grown on its last day, with its own show', () => {
+    const c = celebrationFor(days('x'.repeat(21)), TODAY, sunflower);
+    expect(c).toMatchObject({ progress: 21, from: 4, to: 5, grown: true, special: 'rainbow' });
+    expect(c.title).toBe('Il girasole è sbocciato!');
+  });
+
+  it('counts only the days since the plant was sown', () => {
+    const sown = { species: 'crescione', since: addDays(TODAY, -1) } as const;
+    expect(celebrationFor(days('xxxxxxxx'), TODAY, sown)).toMatchObject({ progress: 2, goal: 5 });
   });
 
   it('revives a dry plant and tells a restart from a first start', () => {
-    expect(celebrationFor(days('xxx.x'), TODAY)).toMatchObject({ revive: true, streak: 4 });
-    expect(celebrationFor(days('xxx..x'), TODAY).title).toBe('Si riparte!');
+    expect(celebrationFor(days('xxx.x'), TODAY, sunflower)).toMatchObject({ revive: true, progress: 4 });
+    expect(celebrationFor(days('xxx..x'), TODAY, sunflower).title).toBe('Si riparte!');
   });
 
   it('uses icons, never emoji, in its texts', () => {
-    for (const n of [1, 2, 3, 4, 5, 6, 10, 15, 20, 25]) {
-      const c = celebrationFor(days('x'.repeat(n)), TODAY);
-      expect(`${c.title} ${c.subtitle}`).not.toMatch(/\p{Extended_Pictographic}/u);
-      expect(c.icon).toBeTruthy();
+    for (const species of SPECIES) {
+      for (const n of [1, 2, species.days - 1, species.days]) {
+        const c = celebrationFor(days('x'.repeat(n)), TODAY, { species: species.id, since: SINCE });
+        expect(`${c.title} ${c.subtitle}`).not.toMatch(/\p{Extended_Pictographic}/u);
+        expect(c.icon).toBeTruthy();
+      }
     }
   });
 });
 
-describe('stageOf', () => {
-  it('grows up to the flower and stays there', () => {
-    expect([0, 1, 3, 5, 6, 40].map(stageOf)).toEqual([0, 1, 3, 5, 5, 5]);
+describe('growingStatus', () => {
+  it('is ready once the days are reached, and never counts past them', () => {
+    const cress = { species: 'crescione', since: SINCE } as const;
+    expect(growingStatus(days('xxxx-'), TODAY, cress)).toMatchObject({ progress: 4, ready: false });
+    expect(growingStatus(days('x'.repeat(9)), TODAY, cress)).toMatchObject({
+      progress: 5,
+      grow: 5,
+      ready: true,
+    });
+  });
+
+  it('waits for a seed sown for tomorrow', () => {
+    const tomorrow = { species: 'crescione', since: addDays(TODAY, 1) } as const;
+    expect(growingStatus(days('xxx'), TODAY, tomorrow)).toMatchObject({ progress: 0, grow: 0 });
+  });
+});
+
+describe('growOf', () => {
+  it('goes from bare soil to grown, with the bud on the last day before', () => {
+    expect([0, 1, 2, 3, 4, 5].map((n) => growOf(n, 5))).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(growOf(59, 60)).toBe(4);
+    expect(growOf(60, 60)).toBe(5);
+  });
+});
+
+describe('the catalogue', () => {
+  it('has ten plants, the longest of 60 days, unlocked by the 30-day one', () => {
+    expect(SPECIES).toHaveLength(10);
+    const longest = SPECIES.reduce((a, b) => (b.days > a.days ? b : a));
+    expect(longest.days).toBe(60);
+    expect(longest.requires.map((id) => speciesOf(id).days)).toEqual([30]);
+  });
+
+  it('only asks for shorter plants first, so every plant can be reached', () => {
+    for (const s of SPECIES) {
+      for (const id of s.requires) expect(speciesOf(id).days).toBeLessThan(s.days);
+    }
+  });
+
+  it('unlocks a plant once what it needs is in the greenhouse', () => {
+    const tomato = speciesOf('pomodoro');
+    const half: Garden = { growing: null, grown: [{ species: 'fragola', on: TODAY }] };
+    expect(missingFor(tomato, half).map((s) => s.id)).toEqual(['peperoncino']);
+    const both: Garden = { ...half, grown: [...half.grown, { species: 'peperoncino', on: TODAY }] };
+    expect(missingFor(tomato, both)).toEqual([]);
   });
 });
 

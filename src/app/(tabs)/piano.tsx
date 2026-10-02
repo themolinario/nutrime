@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Body, Button, Card, Display, Heading, Muted, Overline, Title } from '../../components/ui';
@@ -13,6 +13,7 @@ import { useDeveloperPromoEnabled } from '../../lib/developer';
 import { useDietStore } from '../../lib/store/useDietStore';
 import { accentFor, colors, fonts, radius, spacing } from '../../theme';
 import { Icon } from '../../components/Icon';
+import { showDialog } from '../../lib/dialog';
 
 export default function PlanScreen() {
   const insets = useSafeAreaInsets();
@@ -43,7 +44,7 @@ export default function PlanScreen() {
   if (!plan) return null;
 
   const onReset = () => {
-    Alert.alert(
+    showDialog(
       'Eliminare il piano?',
       'Verranno cancellati il piano importato, le scelte e la lista della spesa. Il diario delle giornate resta.',
       [

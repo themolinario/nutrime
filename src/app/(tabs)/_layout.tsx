@@ -3,6 +3,7 @@ import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DeveloperBanner } from '../../components/DeveloperBanner';
+import { GardenIntro } from '../../components/plant/GardenIntro';
 import { useDietStore } from '../../lib/store/useDietStore';
 import { colors, fonts } from '../../theme';
 import { Icon } from '../../components/Icon';
@@ -98,6 +99,7 @@ export default function TabsLayout() {
         />
       </Tabs>
       <DeveloperBanner bottom={tabBarHeight + 10} />
+      <GardenIntro />
     </View>
   );
 }

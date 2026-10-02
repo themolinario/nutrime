@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,6 +28,7 @@ import {
   weightOn,
 } from '../lib/weight';
 import { colors, fonts, radius, spacing } from '../theme';
+import { showDialog } from '../lib/dialog';
 
 function Stat({ label, value, icon }: { label: string; value: string; icon?: IconName }) {
   return (
@@ -76,7 +76,7 @@ export default function WeightScreen() {
   };
   const save = () => {
     if (typed === null) {
-      Alert.alert('Peso non valido', 'Scrivi il peso in chili, per esempio 72,4.');
+      showDialog('Peso non valido', 'Scrivi il peso in chili, per esempio 72,4.');
       return;
     }
     setWeight(date, typed);
@@ -89,7 +89,7 @@ export default function WeightScreen() {
   const totalDelta = entries.length > 1 && latest ? latest.kg - entries[0].kg : null;
 
   const remove = (day: string) =>
-    Alert.alert('Eliminare la pesata?', `Il peso del ${formatDayMonth(day)} verrà rimosso.`, [
+    showDialog('Eliminare la pesata?', `Il peso del ${formatDayMonth(day)} verrà rimosso.`, [
       { text: 'Annulla', style: 'cancel' },
       { text: 'Elimina', style: 'destructive', onPress: () => setWeight(day, null) },
     ]);

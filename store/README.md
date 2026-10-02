@@ -1,6 +1,6 @@
 # NutriMy — materiale per l'App Store
 
-Tutto quello che serve in App Store Connect. Versione attuale: **1.4.0**.
+Tutto quello che serve in App Store Connect. Versione attuale: **1.5.0**.
 Lingua principale: **Italiano**. I limiti di caratteri sono indicati tra parentesi.
 
 ---
@@ -47,8 +47,8 @@ OGGI: IL MENU DA SPUNTARE
 • «Compila per me» sceglie tutto in un tocco, alternando gli alimenti per variare
 • Aggiungi un alimento fuori piano o modifica la quantità di un giorno
 
-LA TUA PIANTA CRESCE CON TE
-Ogni giornata completata fa crescere la tua pianta: cinque giorni di fila e fiorisce, poi si illumina ogni giorno e ogni cinque giorni ti riserva una sorpresa. Se salti un giorno si secca, ma la salvi completando il giorno dopo.
+LA TUA SERRA CRESCE CON TE
+Scegli una pianta e falla crescere con le giornate completate. Sono dieci, dal crescione pronto in 5 giorni all'ulivo che ne chiede 60: portale a termine per riempire la tua serra e sbloccare le più rare. Se salti un giorno la pianta si secca, ma la salvi completando il giorno dopo.
 
 IL PESO, GIORNO PER GIORNO
 Registra il peso in un tocco e guarda il grafico dell'andamento: ultimo mese, tre mesi, un anno o tutto. Tocca il grafico per leggere ogni pesata.
@@ -90,6 +90,14 @@ nutrizionista,piano alimentare,lista della spesa,pasti,menu,peso,dietologo,alime
 
 ### Novità di questa versione (4000)
 
+Versione 1.5.0:
+
+```
+• La tua serra: scegli una pianta tra dieci e falla crescere con le giornate completate, dal crescione in 5 giorni all'ulivo in 60. Portale a termine per riempire la serra e sbloccare le piante più rare.
+• Ogni pianta ha il suo aspetto, dal basilico al bonsai d'ulivo, e una festa tutta sua quando entra in serra.
+• Finestre e conferme ridisegnate nello stile di NutriMy.
+```
+
 Versione 1.4.0:
 
 ```
@@ -120,13 +128,16 @@ Gli screenshot sono in `store/screenshots-v2/`, già nelle dimensioni richieste:
 | `iphone-6.5/` | iPhone 6,5" (se App Store Connect chiede questa) | 1284 × 2778 |
 | `ipad-13/` | iPad 13" | 2064 × 2752 |
 
-Ordine: `01` Oggi · `02` La tua pianta · `03` Peso · `04` Scegli · `05` Settimana · `06` Spesa ·
+Ordine: `01` Oggi · `02` La tua serra · `03` Peso · `04` Scegli · `05` Settimana · `06` Spesa ·
 `07` Promemoria e widget. Apple ricava da questi tutte le altre misure di iPhone e iPad.
 La schermata Piano non è inclusa perché mostra nome, peso e BMI del PDF.
 
 Video di anteprima (iPhone 6,9", 886 × 1920, 27,6 s): `store/marketing/video/out/preview-iphone.mp4`.
 In App Store Connect si carica nella stessa sezione degli screenshot iPhone; come fotogramma
 di copertina va bene quello della pianta fiorita (intorno ai 6 secondi).
+
+> Dalla 1.5.0 il video mostra ancora la vecchia pianta a fiore unico: finché non viene
+> rigirato con la serra, rilascia con `--skip-video` per lasciare quello già caricato.
 
 Come si rifanno:
 
@@ -204,7 +215,7 @@ The PDF is parsed on the device. The only network calls are the optional backup 
 
 ## 8. Checklist prima dell'invio
 
-- [ ] Build 1.4.0 caricata con `eas submit` e visibile in TestFlight
+- [ ] Build 1.5.0 caricata con `eas submit` e visibile in TestFlight
 - [x] Pagine privacy e supporto online
 - [ ] URL inseriti in App Store Connect
 - [ ] Testi (sezione 3) incollati

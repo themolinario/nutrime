@@ -1,6 +1,6 @@
 import { DatePicker, Host } from '@expo/ui/swift-ui';
 import { router } from 'expo-router';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Heading, Muted, Title } from '../components/ui';
@@ -9,6 +9,7 @@ import { requestReminderPermission } from '../lib/reminders/useReminders';
 import { useDietStore } from '../lib/store/useDietStore';
 import { accentFor, colors, spacing } from '../theme';
 import { Icon } from '../components/Icon';
+import { showDialog } from '../lib/dialog';
 
 /** A sensible first time per meal; the user then adjusts it. */
 const DEFAULT_TIMES: Record<string, string> = {
@@ -44,7 +45,7 @@ export default function RemindersScreen() {
 
   const permitted = async () => {
     if (await requestReminderPermission()) return true;
-    Alert.alert(
+    showDialog(
       'Notifiche disattivate',
       'Per ricevere i promemoria, attiva le notifiche di NutriMy nelle Impostazioni.',
       [

@@ -8,6 +8,7 @@ import { mealsForDate } from '../diet/parse';
 import { addedCategoryId, mealEntries, type AddedFood, type DayExtras } from '../diet/day';
 import { slotKey, type SlotKey } from '../diet/slots';
 import type { DietPlan, FoodCategory, ResolvedMeal } from '../diet/types';
+import { EMPTY_GARDEN, type Garden, type SpeciesId } from '../garden';
 import { archiveOf, type HistoryDay } from '../history';
 
 export { slotKey, type SlotKey };
@@ -42,6 +43,8 @@ export type DietState = {
   archive: Record<string, HistoryDay>;
   /** date → body weight in kg, one reading per day. Independent of the plan. */
   weights: Record<string, number>;
+  /** The plant being grown and the ones already in the greenhouse. */
+  garden: Garden;
 
   /* Device-only state below: never part of the cloud backup. */
   /** Cold starts so far, for the every-Nth-launch developer banner. */
@@ -56,6 +59,8 @@ export type DietState = {
   hideBought: boolean;
   /** Tooltips already shown once, by id. */
   seenTips: Record<string, true>;
+  /** True once the greenhouse has been introduced on this phone. */
+  gardenIntroSeen: boolean;
   /** Anonymous usage statistics: null until asked, then the user's answer. */
   analyticsConsent: boolean | null;
   /** Random id for the statistics, made when the user says yes; never tied to the account. */
@@ -90,6 +95,7 @@ export type DietState = {
   setCycleWeek: (week: number) => void;
   setHideBought: (value: boolean) => void;
   markTipSeen: (id: string) => void;
+  setGardenIntroSeen: () => void;
   /** Brings every tooltip back, e.g. from "Rivedi i suggerimenti". */
   resetTips: () => void;
   setAnalyticsConsent: (value: boolean, installId?: string) => void;
@@ -102,6 +108,12 @@ export type DietState = {
   setLastBackupAt: (value: number | null) => void;
   /** Records the day's weight in kg; null removes the reading. */
   setWeight: (date: string, kg: number | null) => void;
+  /** Starts growing `species`, counting complete days from `since`; any plant growing is lost. */
+  sow: (species: SpeciesId, since: string) => void;
+  /** Gives up the plant being grown, and the days spent on it. */
+  uproot: () => void;
+  /** Moves the plant being grown, now fully grown, to the greenhouse. */
+  harvest: (on: string) => void;
   /** Replaces the user's data with a cloud snapshot. */
   restoreBackup: (data: BackupData) => void;
 };
@@ -123,6 +135,7 @@ export type BackupData = Pick<
   | 'qtyOverrides'
   | 'declined'
   | 'weights'
+  | 'garden'
 >;
 
 export function backupOf(state: BackupData): BackupData {
@@ -141,6 +154,7 @@ export function backupOf(state: BackupData): BackupData {
     qtyOverrides: state.qtyOverrides,
     declined: state.declined,
     weights: state.weights,
+    garden: state.garden,
   };
 }
 
@@ -179,12 +193,14 @@ export const useDietStore = create<DietState>()(
       qtyOverrides: {},
       declined: {},
       weights: {},
+      garden: EMPTY_GARDEN,
       launchCount: 0,
       promoRemote: null,
       authPrompted: false,
       lastBackupAt: null,
       hideBought: false,
       seenTips: {},
+      gardenIntroSeen: false,
       analyticsConsent: null,
       installId: null,
 
@@ -468,6 +484,8 @@ export const useDietStore = create<DietState>()(
 
       resetTips: () => set({ seenTips: {} }),
 
+      setGardenIntroSeen: () => set({ gardenIntroSeen: true }),
+
       // Saying no forgets the id, so a later yes starts as a new phone.
       setAnalyticsConsent: (value, installId) =>
         set({ analyticsConsent: value, installId: value ? (installId ?? null) : null }),
@@ -492,6 +510,18 @@ export const useDietStore = create<DietState>()(
           return { weights };
         }),
 
+      sow: (species, since) =>
+        set((state) => ({ garden: { ...state.garden, growing: { species, since } } })),
+
+      uproot: () => set((state) => ({ garden: { ...state.garden, growing: null } })),
+
+      harvest: (on) =>
+        set((state) => {
+          const { growing, grown } = state.garden;
+          if (!growing) return state;
+          return { garden: { growing: null, grown: [...grown, { species: growing.species, on }] } };
+        }),
+
       restoreBackup: (data) =>
         set({
           plan: data.plan ?? null,
@@ -508,6 +538,7 @@ export const useDietStore = create<DietState>()(
           qtyOverrides: data.qtyOverrides ?? {},
           declined: data.declined ?? {},
           weights: data.weights ?? {},
+          garden: data.garden ?? EMPTY_GARDEN,
         }),
 
       setReminder: (mealKey, time) =>
@@ -537,12 +568,14 @@ export const useDietStore = create<DietState>()(
         qtyOverrides: state.qtyOverrides,
         declined: state.declined,
         weights: state.weights,
+        garden: state.garden,
         launchCount: state.launchCount,
         promoRemote: state.promoRemote,
         authPrompted: state.authPrompted,
         lastBackupAt: state.lastBackupAt,
         hideBought: state.hideBought,
         seenTips: state.seenTips,
+        gardenIntroSeen: state.gardenIntroSeen,
         analyticsConsent: state.analyticsConsent,
         installId: state.installId,
       }),

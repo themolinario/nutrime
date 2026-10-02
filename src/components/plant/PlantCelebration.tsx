@@ -21,20 +21,20 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
-import { FULL_GROWN, useCelebration, type Celebration } from '../../lib/plant';
+import { useCelebration, type Celebration } from '../../lib/plant';
 import { Icon, type IconName } from '../Icon';
 import { fonts, spacing } from '../../theme';
 import {
   Butterflies,
   Confetti,
   Drops,
-  Fruits,
   Rainbow,
   Seed,
   Sparkles,
   StarShower,
 } from './Effects';
 import { Plant, pop, ramp } from './Plant';
+import { lookOf } from './species';
 
 /** The whole show, exit included: a couple of seconds, skippable with a tap. */
 const TOTAL = 3600;
@@ -91,14 +91,46 @@ function Word({
   return <Animated.Text style={[styles.title, style]}>{word}</Animated.Text>;
 }
 
-/** Days 1 to 5 as little leaves filling up: the flower is that close. */
-function Progress({ streak, time }: { streak: number; time: SharedValue<number> }) {
+/** Short plants show every day as a dot filling up; long ones a bar. */
+const MAX_DOTS = 10;
+
+function Progress({
+  progress,
+  goal,
+  time,
+}: {
+  progress: number;
+  goal: number;
+  time: SharedValue<number>;
+}) {
+  if (goal <= MAX_DOTS) {
+    return (
+      <View style={styles.dots}>
+        {Array.from({ length: goal }, (_, i) => (
+          <Dot key={i} index={i} filled={i < progress} fresh={i === progress - 1} time={time} />
+        ))}
+      </View>
+    );
+  }
+  return <Bar progress={progress} goal={goal} time={time} />;
+}
+
+function Bar({ progress, goal, time }: { progress: number; goal: number; time: SharedValue<number> }) {
+  const shown = useAnimatedStyle(() => ({ opacity: ramp(time.value, 1300, 300) }));
+  const fill = useAnimatedStyle(() => {
+    const p = ramp(time.value, 1500, 600);
+    const share = (progress - 1 + p) / goal;
+    return { width: `${Math.max(0, share) * 100}%` };
+  });
   return (
-    <View style={styles.dots}>
-      {Array.from({ length: FULL_GROWN }, (_, i) => (
-        <Dot key={i} index={i} filled={i < streak} fresh={i === streak - 1} time={time} />
-      ))}
-    </View>
+    <Animated.View style={[styles.barRow, shown]}>
+      <View style={styles.bar}>
+        <Animated.View style={[styles.barFill, fill]} />
+      </View>
+      <Text style={styles.barText}>
+        {progress} / {goal}
+      </Text>
+    </Animated.View>
   );
 }
 
@@ -135,7 +167,7 @@ function Show({ celebration: c }: { celebration: Celebration }) {
   const shown = useSharedValue(0);
   const grow = useSharedValue(reduced ? c.to : c.from);
   const dry = useSharedValue(c.revive && !reduced ? 1 : 0);
-  const glow = useSharedValue(reduced && c.lit ? 1 : 0);
+  const glow = useSharedValue(reduced && c.grown ? 1 : 0);
   const leaving = useRef(false);
   const tappable = useRef(false);
 
@@ -159,7 +191,7 @@ function Show({ celebration: c }: { celebration: Celebration }) {
         growAt,
         withTiming(c.to, { duration: 1100, easing: Easing.out(Easing.cubic) }),
       );
-      if (c.lit) glow.value = withDelay(growAt + 200, withTiming(1, { duration: 700 }));
+      if (c.grown) glow.value = withDelay(growAt + 200, withTiming(1, { duration: 700 }));
     }
 
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -198,7 +230,6 @@ function Show({ celebration: c }: { celebration: Celebration }) {
   const plantSize = Math.min(width * 0.68, height * 0.36, 300);
   const plantHeight = (plantSize * 300) / 240;
   const titleAt = growAt + 350;
-  const bloom = c.to === FULL_GROWN && c.from < FULL_GROWN;
 
   const behind = (
     <>
@@ -209,10 +240,9 @@ function Show({ celebration: c }: { celebration: Celebration }) {
     <>
       {c.from === 0 && !c.revive ? <Seed time={time} /> : null}
       {c.revive ? <Drops time={time} /> : null}
-      {c.lit ? <Sparkles time={time} glow={glow} /> : null}
-      {bloom || c.special ? <Confetti time={time} start={bloom ? growAt + 850 : 900} /> : null}
+      {c.grown ? <Sparkles time={time} glow={glow} /> : null}
+      {c.grown ? <Confetti time={time} start={growAt + 850} at={lookOf(c.species).glow} /> : null}
       {c.special === 'butterflies' ? <Butterflies time={time} /> : null}
-      {c.special === 'fruits' ? <Fruits time={time} /> : null}
       {c.special === 'stars' ? <StarShower time={time} /> : null}
     </>
   );
@@ -240,7 +270,7 @@ function Show({ celebration: c }: { celebration: Celebration }) {
           <Svg width={width} height={height}>
             <Defs>
               <RadialGradient id="spot" cx="50%" cy="42%" r="55%">
-                <Stop offset="0" stopColor={c.lit ? '#FFE9A8' : '#E8F7D8'} stopOpacity={0.3} />
+                <Stop offset="0" stopColor={c.grown ? '#FFE9A8' : '#E8F7D8'} stopOpacity={0.3} />
                 <Stop offset="1" stopColor="#0B1A12" stopOpacity={0} />
               </RadialGradient>
             </Defs>
@@ -258,6 +288,7 @@ function Show({ celebration: c }: { celebration: Celebration }) {
               grow={grow}
               dry={dry}
               glow={glow}
+              species={c.species}
               behind={behind}
               front={front}
             />
@@ -271,13 +302,13 @@ function Show({ celebration: c }: { celebration: Celebration }) {
               ))}
             </View>
             <Animated.Text style={[styles.subtitle, subtitle]}>{c.subtitle}</Animated.Text>
-            {c.streak <= FULL_GROWN ? (
-              <Progress streak={c.streak} time={time} />
-            ) : (
+            {c.grown ? (
               <Animated.View style={[styles.chip, subtitle]}>
-                <Icon name="flame" size={15} color="#FFB547" />
-                <Text style={styles.chipText}>{c.streak} giorni di fila</Text>
+                <Icon name="plant" size={15} color="#FFB547" />
+                <Text style={styles.chipText}>Aggiunta alla serra</Text>
               </Animated.View>
+            ) : (
+              <Progress progress={c.progress} goal={c.goal} time={time} />
             )}
           </View>
 
@@ -327,6 +358,18 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.35)',
   },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: spacing.sm },
+  bar: {
+    width: 180,
+    height: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  barFill: { height: '100%', backgroundColor: '#7BCB52' },
+  barText: { fontFamily: fonts.bodyBold, fontSize: 14, color: 'rgba(255,255,255,0.82)' },
   badge: {
     width: 52,
     height: 52,

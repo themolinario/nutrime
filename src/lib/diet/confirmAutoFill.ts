@@ -1,9 +1,10 @@
-import { Alert } from 'react-native';
+
 
 import { track } from '../analytics';
 import { useDietStore } from '../store/useDietStore';
 import { mealsForDate } from './parse';
 import { slotKey } from './slots';
+import { showDialog } from '../dialog';
 
 /**
  * How many real picks the days already have. Tables with a single food are
@@ -51,7 +52,7 @@ export function confirmAutoFill(dates: string[], overwrite: boolean) {
   const keepEaten = 'Gli alimenti già spuntati restano come sono.';
 
   if (overwrite) {
-    Alert.alert(
+    showDialog(
       'Rigenerare le scelte?',
       `Le scelte ${scope} verranno sostituite con nuove proposte. ${keepEaten}`,
       [
@@ -62,7 +63,7 @@ export function confirmAutoFill(dates: string[], overwrite: boolean) {
     return;
   }
 
-  Alert.alert(
+  showDialog(
     'Alcune scelte sono già fatte',
     `Hai già scelto ${picks} ${picks === 1 ? 'alimento' : 'alimenti'} ${scope}. Vuoi completare solo quelli mancanti o rifare tutto?`,
     [

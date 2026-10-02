@@ -1,8 +1,9 @@
 import * as Application from 'expo-application';
-import { Alert, Linking, Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 import { DEVELOPER, DEVELOPER_PROMO_EVERY, FEATURES } from '../config/app';
 import { useDietStore } from './store/useDietStore';
+import { showDialog } from './dialog';
 
 export type ContactTopic = 'change' | 'idea' | 'project';
 
@@ -29,7 +30,7 @@ export async function contactDeveloper(topic: ContactTopic) {
   try {
     await Linking.openURL(url);
   } catch {
-    Alert.alert('Nessuna app di posta', `Scrivi a ${DEVELOPER.email}`);
+    showDialog('Nessuna app di posta', `Scrivi a ${DEVELOPER.email}`);
   }
 }
 
