@@ -1,0 +1,12 @@
+appId: com.marcomolinari.nutrime
+---
+- tapOn: { id: 'weight-card' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'weight-minus' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'weight-save' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+# Dragging across the chart reads out each day (right to left: left to right is iOS's back swipe).
+- swipe: { start: '84%,72%', end: '22%,72%', duration: 2200 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'weight-back' }

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NutriMy · Privacy</title>
+<style>
+  :root { --bg: #FBF6EE; --text: #1C2B24; --muted: #5E6B64; --green: #1F6B4A; --border: #E7DFD2; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
+  .brand { color: var(--green); font-weight: 700; letter-spacing: .12em; font-size: 13px; text-transform: uppercase; }
+  h1 { font-family: Georgia, serif; font-size: 34px; line-height: 1.15; margin: 6px 0 4px; }
+  h2 { font-size: 18px; margin: 36px 0 8px; color: var(--green); }
+  .updated { color: var(--muted); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  a { color: var(--green); }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">NutriMy</div>
+  <h1>Informativa sulla privacy</h1>
+  <p class="updated">Ultimo aggiornamento: 30 settembre 2026</p>
+
+  <p>NutriMy è pensata per funzionare senza raccogliere dati: il PDF della dieta viene letto sul
+  tuo telefono e, se non crei un account, tutto resta lì. Questa pagina spiega cosa succede
+  quando usi le funzioni che passano da internet.</p>
+
+  <h2>Titolare del trattamento</h2>
+  <p>Marco Molinari · <a href="mailto:themolinario@gmail.com">themolinario@gmail.com</a></p>
+
+  <h2>Senza account</h2>
+  <p>Il PDF, il piano alimentare, le scelte dei pasti, le spunte, la lista della spesa e i
+  promemoria sono salvati solo sul dispositivo. Il PDF non viene mai inviato a nessuno.
+  I promemoria sono notifiche locali programmate dal telefono.</p>
+
+  <h2>Con l'account (facoltativo)</h2>
+  <p>Se crei un account, NutriMy salva un backup dei tuoi dati per poterli recuperare su un
+  altro dispositivo.</p>
+  <table>
+    <tr><th>Dato</th><th>Perché</th></tr>
+    <tr><td>Indirizzo email (o l'identificativo di Accedi con Apple o di Google)</td><td>Per riconoscere il tuo account</td></tr>
+    <tr><td>Piano alimentare letto dal PDF, compresi i dati della visita riportati nel PDF (ad esempio peso, altezza, BMI)</td><td>Per ripristinarlo su un nuovo dispositivo</td></tr>
+    <tr><td>Scelte dei pasti, spunte, cronologia, pesate che registri nell'app, lista della spesa, orari dei promemoria</td><td>Per ripristinarli su un nuovo dispositivo</td></tr>
+  </table>
+  <p>Alcuni di questi sono dati relativi alla salute. Li trattiamo solo perché scegli di creare
+  l'account e di attivare il backup (consenso esplicito, art. 9.2.a GDPR), e soltanto per
+  offrirti il backup.</p>
+  <p>Il backup è ospitato da <strong>Supabase</strong> su server nell'Unione Europea
+  (Francoforte). Ogni backup è accessibile solo al suo proprietario.</p>
+
+  <p>Se accedi con Google o con Apple, riceviamo da loro solo il tuo indirizzo email e un
+  identificativo dell'account: nessun altro dato del tuo profilo.</p>
+
+  <h2>Ricerca degli alimenti</h2>
+  <p>Quando cerchi un alimento da aggiungere, il testo che scrivi viene inviato a
+  <a href="https://world.openfoodfacts.org">Open Food Facts</a> per trovare i prodotti. Non viene
+  inviato nessun dato che ti identifichi.</p>
+
+  <h2>Statistiche d'uso anonime (facoltative)</h2>
+  <p>Al primo avvio NutriMy ti chiede se puoi aiutarci con statistiche anonime. Solo se rispondi
+  sì, l'app invia informazioni su come viene usata, per capire cosa migliorare:</p>
+  <ul>
+    <li>quali schermate apri e quali funzioni usi (ad esempio «Compila per me», la spesa, la
+    condivisione);</li>
+    <li>dati tecnici: sistema (iOS o Android) e sua versione, versione dell'app, numero di pasti
+    e pagine del piano, tempo di lettura del PDF.</li>
+  </ul>
+  <p>Non inviamo mai il PDF, gli alimenti, le quantità, i dati della visita, il nome, l'email o
+  l'account. Le statistiche sono legate solo a un codice casuale creato sul telefono, non
+  collegato a te né al tuo account. Base giuridica: il tuo consenso (art. 6.1.a GDPR), che puoi
+  revocare in qualsiasi momento da Piano › Statistiche anonime; quando lo revochi il codice viene
+  eliminato dal telefono. Anche queste statistiche sono conservate su Supabase nell'Unione
+  Europea e cancellate automaticamente dopo 14 mesi.</p>
+
+  <h2>Cosa non facciamo</h2>
+  <ul>
+    <li>Nessuna pubblicità e nessun tracciamento tra app o siti</li>
+    <li>Nessuna profilazione e nessuno strumento di analisi di terze parti</li>
+    <li>Nessuna vendita o cessione dei dati a terzi</li>
+  </ul>
+
+  <h2>Per quanto tempo</h2>
+  <p>Il backup resta finché hai l'account. Quando elimini l'account dall'app
+  (Piano › Account › Elimina account) l'account e il backup vengono cancellati subito e in modo
+  definitivo. Se non hai più l'app puoi chiederlo per email: trovi come fare nella pagina
+  <a href="elimina-account">Eliminare l'account</a>. I dati sul telefono si cancellano
+  disinstallando l'app.</p>
+
+  <h2>I tuoi diritti</h2>
+  <p>Puoi chiedere l'accesso, la rettifica, la cancellazione o la portabilità dei tuoi dati e
+  revocare il consenso in qualsiasi momento scrivendo a
+  <a href="mailto:themolinario@gmail.com">themolinario@gmail.com</a>. Puoi anche presentare
+  reclamo al Garante per la protezione dei dati personali
+  (<a href="https://www.garanteprivacy.it">garanteprivacy.it</a>).</p>
+
+  <h2>Minori</h2>
+  <p>L'account è riservato a chi ha almeno 14 anni.</p>
+
+  <h2>Modifiche</h2>
+  <p>Se questa informativa cambia, la data in alto viene aggiornata.</p>
+</main>
+</body>
+</html>

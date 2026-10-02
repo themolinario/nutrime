@@ -1,0 +1,5 @@
+appId: com.marcomolinari.nutrime
+---
+- tapOn: { id: 'tab-settimana' }
+- scrollUntilVisible: { element: { id: 'week-horizon-7' }, direction: UP }
+- tapOn: { id: 'week-horizon-7' }

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NutriMy PDF reader</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+    </style>
+    <script>
+/*__PDFJS_BUNDLE__*/
+    </script>
+  </head>
+  <body>
+    <script>
+      /**
+       * Offline PDF text extractor.
+       *
+       * Runs inside a WebView with no network access: pdf.js and its worker are
+       * bundled into pdfjs.bundle.js, which registers the worker on
+       * `globalThis.pdfjsWorker` so everything executes on this thread.
+       *
+       * Coordinates are normalised to a top-down origin so the parser can reason
+       * about the page the same way a reader sees it.
+       */
+      (function () {
+        var MAX_PAGES = 200;
+
+        function round(n) {
+          return Math.round(n * 100) / 100;
+        }
+
+        async function extract(base64) {
+          var binary = atob(base64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+          var doc = await window.pdfjsLib.getDocument({
+            data: bytes,
+            useSystemFonts: false,
+            isEvalSupported: false,
+            verbosity: 0,
+          }).promise;
+
+          var pages = [];
+          var count = Math.min(doc.numPages, MAX_PAGES);
+          for (var n = 1; n <= count; n++) {
+            var page = await doc.getPage(n);
+            var viewport = page.getViewport({ scale: 1 });
+            var content = await page.getTextContent();
+            var items = [];
+            for (var j = 0; j < content.items.length; j++) {
+              var item = content.items[j];
+              if (!item.str || !item.str.trim()) continue;
+              items.push({
+                s: item.str,
+                x: round(item.transform[4]),
+                y: round(viewport.height - item.transform[5]),
+                w: round(item.width),
+                h: round(item.height),
+              });
+            }
+            pages.push({
+              n: n,
+              width: round(viewport.width),
+              height: round(viewport.height),
+              items: items,
+            });
+            page.cleanup();
+          }
+          await doc.destroy();
+          return { pages: pages, truncated: doc.numPages > count };
+        }
+
+        window.__extract = function (base64) {
+          return extract(base64).catch(function (error) {
+            return { error: String((error && error.message) || error) };
+          });
+        };
+
+        /** Bridge used by the React Native host. */
+        window.__run = function (base64) {
+          window.__extract(base64).then(function (result) {
+            window.ReactNativeWebView.postMessage(JSON.stringify(result));
+          });
+        };
+
+        window.__pdfReady = true;
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ ready: true }));
+        }
+      })();
+    </script>
+  </body>
+</html>

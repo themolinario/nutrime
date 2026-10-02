@@ -1,0 +1,35 @@
+# Choose a food by hand, then tick it off as eaten.
+appId: com.marcomolinari.nutrime
+name: 02 · Scelta di un alimento
+---
+- launchApp
+- tapOn:
+    id: 'tab-oggi'
+- assertVisible:
+    id: 'today-progress'
+
+- tapOn:
+    id: 'pick-colazione-.*'
+    index: 0
+- assertVisible:
+    id: 'choose-list'
+- tapOn:
+    id: 'option-.*'
+    index: 0
+
+# The pick shows up on the meal card and counts towards the day.
+- assertVisible:
+    id: 'chosen-colazione-.*'
+- assertVisible: '\d+ di \d+ completati, [1-9]\d* scelti'
+
+# Ticking it off moves the "completed" counter.
+- tapOn:
+    id: 'eat-colazione-.*'
+    index: 0
+- assertVisible: '[1-9]\d* di \d+ completati, [1-9]\d* scelti'
+
+# Tapping again un-ticks it.
+- tapOn:
+    id: 'eat-colazione-.*'
+    index: 0
+- assertVisible: '0 di \d+ completati, [1-9]\d* scelti'

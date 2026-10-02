@@ -1,0 +1,95 @@
+# Import the nutritionist's PDF and land on a plan built from it.
+#
+# scripts/e2e.sh installs the app and drops the PDF into its Documents folder,
+# which is the same place a real user's PDF lands when they share it to NutriMy.
+appId: com.marcomolinari.nutrime
+name: 01 · Importa il PDF della dieta
+---
+- launchApp
+
+# A previous launch can leave an "open in NutriMy?" system prompt on screen.
+- tapOn:
+    text: 'Annulla'
+    optional: true
+
+# A first run opens on the three-step introduction: walk through it.
+- runFlow:
+    when:
+      visible:
+        id: 'onboarding-step-1'
+    commands:
+      - tapOn:
+          id: 'onboarding-next'
+      - tapOn:
+          id: 'onboarding-next'
+      - tapOn:
+          id: 'onboarding-next'
+      # The online backup is offered next; these flows run without an account.
+      - tapOn:
+          id: 'auth-skip'
+
+# Start from the import screen, whether this is a first run or a re-import.
+- runFlow:
+    when:
+      visible:
+        id: 'tab-piano'
+    commands:
+      - tapOn:
+          id: 'tab-piano'
+      - scrollUntilVisible:
+          element:
+            id: 'plan-reimport'
+          direction: DOWN
+      - tapOn:
+          id: 'plan-reimport'
+- assertVisible:
+    id: 'import-pick'
+
+# The system picker lives in another process and can drop the first attempt when
+# the app has just been reinstalled, so opening it is worth retrying.
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          id: 'import-pick'
+      - extendedWaitUntil:
+          visible: 'Sfoglia'
+          timeout: 20000
+      - tapOn: 'Sfoglia'
+      # At the browse root the PDF is reached through iPhone › NutriMy.
+      - runFlow:
+          when:
+            visible: 'Posizioni'
+          commands:
+            - tapOn: 'iPhone'
+            - tapOn: 'NutriMy'
+      - extendedWaitUntil:
+          visible:
+            id: 'Dieta, pdf'
+          timeout: 20000
+      - tapOn:
+          id: 'Dieta, pdf'
+      # Reading 24 pages of PDF takes a moment on a cold WebView.
+      - extendedWaitUntil:
+          visible:
+            id: 'tab-oggi'
+          timeout: 120000
+
+- assertVisible:
+    id: 'today-title'
+- assertVisible:
+    id: 'today-progress'
+- assertVisible:
+    id: 'meal-colazione'
+- scrollUntilVisible:
+    element:
+      id: 'meal-pranzo'
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: 'meal-cena'
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: 'meal-arco-della-giornata'
+    direction: DOWN

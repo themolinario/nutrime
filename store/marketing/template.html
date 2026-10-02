@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Bricolage'; font-weight: 800; src: url('../../node_modules/@expo-google-fonts/bricolage-grotesque/800ExtraBold/BricolageGrotesque_800ExtraBold.ttf'); }
+  @font-face { font-family: 'Bricolage'; font-weight: 600; src: url('../../node_modules/@expo-google-fonts/bricolage-grotesque/600SemiBold/BricolageGrotesque_600SemiBold.ttf'); }
+  @font-face { font-family: 'Figtree'; font-weight: 500; src: url('../../node_modules/@expo-google-fonts/figtree/500Medium/Figtree_500Medium.ttf'); }
+  @font-face { font-family: 'Figtree'; font-weight: 600; src: url('../../node_modules/@expo-google-fonts/figtree/600SemiBold/Figtree_600SemiBold.ttf'); }
+  @font-face { font-family: 'Figtree'; font-weight: 700; src: url('../../node_modules/@expo-google-fonts/figtree/700Bold/Figtree_700Bold.ttf'); }
+
+  :root {
+    --green: #1F6B4A; --deep: #14432F; --cream: #FBF6EE; --amber: #E9A020; --terra: #D2603A;
+    --plum: #6B4A7A; --ink: #1B241E; --muted: #6E7C72;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { font-family: 'Figtree', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* Everything is sized from --u = 1% of the canvas width, so one layout serves every size. */
+  .canvas {
+    --u: calc(100vw / 100);
+    position: relative; width: 100vw; height: 100vh; overflow: hidden;
+    padding: calc(var(--u) * 9) calc(var(--u) * 7.5) 0;
+  }
+  .kicker {
+    font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    font-size: calc(var(--u) * 3); opacity: .8;
+  }
+  h1 {
+    font-family: 'Bricolage'; font-weight: 800; letter-spacing: -0.035em;
+    font-size: calc(var(--u) * 10.4); line-height: 0.98; margin-top: calc(var(--u) * 2.2);
+  }
+  h1 em { font-style: normal; position: relative; white-space: nowrap; }
+  h1 em svg { position: absolute; left: -2%; bottom: -0.16em; width: 104%; height: .32em; overflow: visible; }
+  .sub {
+    font-weight: 500; font-size: calc(var(--u) * 4.1); line-height: 1.32;
+    margin-top: calc(var(--u) * 3.2); max-width: 88%; opacity: .85;
+  }
+
+  /* Phone */
+  .phone {
+    position: absolute; width: calc(var(--u) * 74); aspect-ratio: 1320 / 2868;
+    left: 50%; transform: translateX(-50%) rotate(var(--tilt, 0deg));
+    background: #101311; border-radius: calc(var(--u) * 11.5);
+    padding: calc(var(--u) * 2.1);
+    box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 9) rgba(20, 30, 24, .35),
+      inset 0 0 0 calc(var(--u) * .5) #2b302d;
+  }
+  .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: calc(var(--u) * 9.6); display: block; }
+  .phone::after {
+    content: ''; position: absolute; top: calc(var(--u) * 3.7); left: 50%; transform: translateX(-50%);
+    width: calc(var(--u) * 20); height: calc(var(--u) * 5.6); border-radius: 99px; background: #0a0c0b;
+  }
+
+  /* Floating bits */
+  .chip {
+    position: absolute; display: flex; align-items: center; gap: calc(var(--u) * 2);
+    background: #fff; color: var(--ink); border-radius: calc(var(--u) * 4);
+    padding: calc(var(--u) * 2.6) calc(var(--u) * 3.6);
+    font-weight: 700; font-size: calc(var(--u) * 3.5);
+    box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 5) rgba(20, 30, 24, .22);
+    transform: rotate(var(--r, 0deg)); z-index: 3; white-space: nowrap;
+  }
+  .chip small { display: block; font-weight: 500; font-size: .8em; color: var(--muted); margin-top: .15em; }
+  .chip .dot { width: calc(var(--u) * 8); height: calc(var(--u) * 8); border-radius: calc(var(--u) * 2.4);
+    display: grid; place-items: center; font-size: calc(var(--u) * 4.6); flex: none; }
+  /* Icon stickers (the app's Phosphor icons, never emoji): a round badge with the icon inside. */
+  .sticker { position: absolute; width: calc(var(--u) * var(--s, 15)); aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; transform: rotate(var(--r, 0deg)); z-index: 2;
+    box-shadow: 0 calc(var(--u) * 1.6) calc(var(--u) * 3.4) rgba(0,0,0,.18); }
+  .sticker svg { width: 56%; height: 56%; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(calc(var(--u) * 1)); }
+
+  /* PDF card (hero) */
+  .pdf {
+    position: absolute; width: calc(var(--u) * 27); aspect-ratio: 3/4; background: #fff; border-radius: calc(var(--u) * 3);
+    padding: calc(var(--u) * 3); transform: rotate(-11deg); z-index: 3;
+    box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 6) rgba(0,0,0,.3);
+  }
+  .pdf .tag { background: var(--terra); color: #fff; font-weight: 700; font-size: calc(var(--u) * 2.8);
+    display: inline-block; padding: calc(var(--u) * .6) calc(var(--u) * 1.6); border-radius: calc(var(--u) * 1); }
+  .pdf .line { height: calc(var(--u) * 1.3); background: #EFE7DA; border-radius: 99px; margin-top: calc(var(--u) * 2); }
+
+  /* Sheet card (choices) */
+  .sheet {
+    position: absolute; left: calc(var(--u) * 7.5); right: calc(var(--u) * 7.5);
+    border-radius: calc(var(--u) * 6); overflow: hidden; background: var(--cream);
+    box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 10) rgba(60, 40, 10, .25); transform: rotate(-2deg); z-index: 2;
+  }
+  .sheet img { width: 100%; display: block; }
+
+  /* Notifications + widget */
+  .notif {
+    position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6);
+    background: rgba(255,255,255,.92); border-radius: calc(var(--u) * 6);
+    padding: calc(var(--u) * 3.6) calc(var(--u) * 4.2); display: flex; gap: calc(var(--u) * 3);
+    box-shadow: 0 calc(var(--u) * 2.5) calc(var(--u) * 7) rgba(25, 10, 30, .35); z-index: 3; color: #111;
+  }
+  .notif img { width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: calc(var(--u) * 2.4); flex: none; }
+  .notif .meta { display: flex; justify-content: space-between; font-size: calc(var(--u) * 2.9); color: #6c6c70; font-weight: 600; }
+  .notif .t { font-weight: 700; font-size: calc(var(--u) * 3.7); margin-top: calc(var(--u) * .6); }
+  .notif .b { font-weight: 500; font-size: calc(var(--u) * 3.4); line-height: 1.3; margin-top: calc(var(--u) * .5); color: #2b2b2e; }
+  .widget {
+    position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); background: var(--cream);
+    border-radius: calc(var(--u) * 8); padding: calc(var(--u) * 5) calc(var(--u) * 6);
+    box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 8) rgba(25, 10, 30, .35); z-index: 3; color: var(--ink);
+  }
+  .widget .head { display: flex; justify-content: space-between; font-size: calc(var(--u) * 3.1); font-weight: 700; }
+  .widget .head span:first-child { color: var(--green); letter-spacing: .04em; }
+  .widget .head span:last-child { color: var(--muted); font-weight: 500; }
+  .widget .row { display: flex; align-items: center; gap: calc(var(--u) * 3); margin-top: calc(var(--u) * 3.2);
+    font-size: calc(var(--u) * 4); font-weight: 600; }
+  .widget .row i { width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); border-radius: 50%;
+    border: calc(var(--u) * .55) solid var(--green); flex: none; display: grid; place-items: center; color: #fff; font-style: normal; font-size: calc(var(--u) * 3.2); }
+  .widget .row i.on { background: var(--green); }
+  .widget .row .q { margin-left: auto; color: var(--green); font-weight: 700; font-size: .9em; }
+  .widget .row s { color: var(--muted); }
+
+  /* Android (Google Play): a phone with a punch-hole camera, no notch. */
+  .android .phone { aspect-ratio: 1080 / 2400; border-radius: calc(var(--u) * 8); padding: calc(var(--u) * 1.6); }
+  .android .phone img { border-radius: calc(var(--u) * 6.6); }
+  .android .phone::after { width: calc(var(--u) * 3.2); height: calc(var(--u) * 3.2); top: calc(var(--u) * 3.4); border-radius: 50%; }
+
+  /* Wide canvases (iPad): everything a bit smaller, and a tablet instead of the phone. */
+  .wide .canvas { --u: calc(100vw / 100 * .72); }
+  .wide .phone {
+    width: 78vw; aspect-ratio: 2064 / 2752; border-radius: 4.2vw; padding: 1.5vw;
+  }
+  .wide .phone img { border-radius: 2.9vw; }
+  .wide .phone::after { display: none; }
+</style>
+</head>
+<body>
+<script src="icons.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const panel = params.get('panel') ?? '1';
+if (innerWidth / innerHeight > 0.6) document.documentElement.classList.add('wide');
+const wide = document.documentElement.classList.contains('wide');
+// Google Play screenshots show the Android app.
+const android = params.get('device') === 'android';
+if (android) document.documentElement.classList.add('android');
+
+const squiggle = (color) => `<svg viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M3 14 C 40 4, 80 18, 120 9 S 180 6, 197 11" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/></svg>`;
+const appIcon = 'raw/icon.png';
+
+// Where the phone starts, as a fraction of the canvas height.
+const phoneTop = (p) => `top: calc(100vh * ${p});`;
+
+// A round sticker with one of the app's icons: `sticker('Carrot', '#E07A3F', '#FFF1E6', 'left: 4%; top: 50%', -12, 15)`.
+const sticker = (name, color, bg, pos, rot = 0, size = 15) =>
+  `<div class="sticker" style="${pos}; --r: ${rot}deg; --s: ${size}; background: ${bg}">${icon(name, color)}</div>`;
+const dot = (name, color, bg) => `<span class="dot" style="background:${bg}">${icon(name, color)}</span>`;
+
+const PANELS = {
+  // 1 · Hero: the PDF becomes a checklist
+  '1': {
+    bg: 'radial-gradient(120% 80% at 80% 10%, #2A8A60 0%, #1F6B4A 35%, #123A29 100%)', color: '#FBF6EE',
+    kicker: 'NutriMy', title: `La tua dieta,<br><em>finalmente${squiggle('#E9A020')}</em> viva.`,
+    sub: 'Carica il PDF del nutrizionista: ogni giorno trovi il menu pronto da spuntare.',
+    body: `
+      <div class="phone" style="${phoneTop(wide ? .36 : .43)} --tilt: -3deg; left: ${wide ? 62 : 54}%"><img src="raw/oggi.png"></div>
+      <div class="pdf" style="left: ${wide ? 5 : 7}%; top: ${wide ? 26.5 : 27.5}%; width: calc(var(--u) * ${wide ? 15 : 22})">
+        <span class="tag">PDF</span><div class="line"></div><div class="line" style="width:70%"></div>
+        <div class="line"></div><div class="line" style="width:55%"></div><div class="line" style="width:80%"></div>
+      </div>
+      <svg style="position:absolute; left: ${wide ? 19 : 33}%; top: ${wide ? 29 : 31}%; width: calc(var(--u) * ${wide ? 30 : 26}); z-index: 3; overflow: visible" viewBox="0 0 120 60"><path d="M4 14 C 40 -4, 86 6, 108 44" fill="none" stroke="#E9A020" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 11"/><path d="M96 40 L 110 48 L 113 32" fill="none" stroke="#E9A020" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${sticker('Sparkle', '#E9A020', '#FDF1DC', `left: ${wide ? 40 : 58}%; top: ${wide ? 27 : 26}%`, 8, 10)}
+      <div class="chip" style="right: ${wide ? 8 : 4}%; top: ${wide ? 74 : 70}%; --r: 4deg">
+        ${dot('CheckCircle', '#E9A020', '#FDF1DC')}<span>Colazione fatta<small>un tocco e il pasto è spuntato</small></span>
+      </div>`,
+  },
+  // 2 · The habit plant
+  '2': {
+    bg: 'radial-gradient(110% 75% at 50% 35%, #2C5A40 0%, #173726 45%, #0B1A12 100%)', color: '#FBF6EE',
+    kicker: 'La tua pianta', title: `Ogni giornata<br>la fa <em>crescere${squiggle('#FF8FB3')}</em>.`,
+    sub: 'Completa i pasti del giorno e la tua pianta cresce. Cinque giorni di fila e fiorisce.',
+    body: `
+      <div class="phone" style="${phoneTop(wide ? .36 : .42)} --tilt: 2deg; left: ${wide ? 50 : 52}%"><img src="raw/pianta.png"></div>
+      <div class="chip" style="left: ${wide ? 7 : 3}%; top: ${wide ? 50 : 55}%; --r: -5deg">
+        ${dot('Fire', '#D2603A', '#FBEAE3')}<span>5 giorni di fila<small>la serie continua</small></span>
+      </div>
+      <div class="chip" style="right: ${wide ? 7 : 3}%; top: ${wide ? 72 : 76}%; --r: 4deg">
+        ${dot('Flower', '#FF5E8E', '#FFE4EC')}<span>È fiorita!<small>poi si illumina ogni giorno</small></span>
+      </div>
+      ${sticker('Plant', '#3E9A57', '#E4F0E8', `left: ${wide ? 12 : 6}%; top: ${wide ? 80 : 86}%`, -10, wide ? 10 : 14)}`,
+  },
+  // 3 · Weight
+  '3': {
+    bg: 'linear-gradient(170deg, #F0E9F3 0%, #DCCDE6 100%)', color: '#3E2A49',
+    kicker: 'Peso', title: `Il tuo peso,<br><em>giorno${squiggle('#6B4A7A')}</em> per giorno.`,
+    sub: 'Una pesata al giorno e il grafico ti mostra tutta la strada fatta.',
+    body: `
+      <div class="blob" style="width:55%; aspect-ratio:1; background:#C9B2D8; left:-16%; top:48%; opacity:.6"></div>
+      <div class="phone" style="${phoneTop(wide ? .36 : .42)} --tilt: -2deg; left: ${wide ? 46 : 50}%"><img src="raw/peso.png"></div>
+      <div class="chip" style="right: ${wide ? 6 : 3}%; top: ${wide ? 55 : 60}%; --r: 4deg">
+        ${dot('ChartLineDown', '#1F6B4A', '#E4F0E8')}<span>${android ? '−2,8' : '−2,6'} kg<small>nell’ultimo mese</small></span>
+      </div>
+      <div class="chip" style="left: ${wide ? 6 : 3}%; top: ${wide ? 77 : 81}%; --r: -4deg">
+        ${dot('Scales', '#6B4A7A', '#F0E9F3')}<span>Una pesata al giorno<small>e il grafico si aggiorna</small></span>
+      </div>`,
+  },
+  // 4 · Choices from the plan
+  '4': {
+    bg: 'linear-gradient(170deg, #FDF1DC 0%, #F9E2B8 100%)', color: '#1B241E',
+    kicker: 'Le alternative del piano', title: `Scegli tu,<br>il resto è <em>già${squiggle('#D2603A')}</em> pesato.`,
+    sub: 'Per ogni pasto le alternative del nutrizionista, con le grammature giuste.',
+    body: `
+      <div class="blob" style="width:60%; aspect-ratio:1; background:#F4C77A; right:-18%; top:40%; opacity:.55"></div>
+      <div class="sheet" style="top: ${wide ? 36 : 38}%; ${wide ? 'left: 18%; right: 18%;' : 'left: 5%; right: 5%;'}"><img src="raw/scegli-crop.png"></div>
+      ${sticker('BowlFood', '#D2603A', '#FFFFFF', `left: 7%; top: ${wide ? 80 : 81}%`, -12, wide ? 12 : 17)}
+      ${sticker('Avocado', '#4E8F3A', '#FFFFFF', `right: 7%; top: ${wide ? 78 : 79}%`, 10, wide ? 12 : 17)}
+      ${sticker('OrangeSlice', '#E9A020', '#FFFFFF', `left: 42%; top: 88%`, 6, 13)}
+      <div class="chip" style="left: ${wide ? 30 : 16}%; top: ${wide ? 70 : android ? 76 : 68}%; --r: -3deg">
+        ${dot('Scales', '#D2603A', '#FBEAE3')}<span>${android ? 'Fiocchi di farro · g 60' : 'Pasta di farro · g 120'}<small>quantità dal tuo piano</small></span>
+      </div>`,
+  },
+  // 5 · The week in one tap
+  '5': {
+    bg: 'linear-gradient(165deg, #E0754E 0%, #C9532E 100%)', color: '#FFF8F2',
+    kicker: 'Settimana', title: `Una settimana<br>in <em>un tocco${squiggle('#FDF1DC')}</em>.`,
+    sub: '«Compila tutto» sceglie per te e varia i pasti da un giorno all’altro.',
+    body: `
+      <div class="phone" style="${phoneTop(wide ? .36 : .42)} --tilt: 3deg; left: ${wide ? 40 : 46}%"><img src="raw/settimana.png"></div>
+      <div class="chip" style="left: ${wide ? 62 : 52}%; top: ${wide ? 50 : 53}%; --r: -5deg; background: #1F6B4A; color: #fff">
+        ${dot('Sparkle', '#FFFFFF', 'rgba(255,255,255,.16)')}<span>Compila tutto</span>
+      </div>
+      <div class="chip" style="left: ${wide ? 8 : 3}%; top: ${wide ? 74 : 76}%; --r: 4deg">
+        ${dot('CalendarCheck', '#1F6B4A', '#E4F0E8')}<span>7 giorni pianificati<small>in meno di un secondo</small></span>
+      </div>`,
+  },
+  // 6 · Shopping list
+  '6': {
+    bg: 'linear-gradient(170deg, #EAF4EC 0%, #CFE6D6 100%)', color: '#14432F',
+    kicker: 'Lista della spesa', title: `La spesa si<br>scrive <em>da sola${squiggle('#E9A020')}</em>.`,
+    sub: 'Quantità già sommate, divise per reparto. Condividila su WhatsApp in un tocco.',
+    body: `
+      <div class="phone" style="${phoneTop(wide ? .36 : .42)} --tilt: -2deg"><img src="raw/spesa.png"></div>
+      ${sticker('Carrot', '#E07A3F', '#FFFFFF', `left: ${wide ? 66 : 2}%; top: ${wide ? 27 : 50}%`, -14)}
+      ${sticker('Pepper', '#D2483A', '#FFFFFF', `right: ${wide ? 5 : 2}%; top: ${wide ? 22 : 45}%`, 12)}
+      ${wide ? '' : `${sticker('Cheese', '#E9A020', '#FFFFFF', 'left: 3%; top: 80%', 8)}
+      ${sticker('Bread', '#B0662F', '#FFFFFF', 'right: 4%; top: 84%', -8)}`}
+      <div class="chip" style="right: ${wide ? 20 : 5}%; top: ${wide ? 62 : 64}%; --r: 4deg">
+        ${dot('ShoppingCart', '#1F6B4A', '#E4F0E8')}<span>66 articoli<small>per 7 giorni, già sommati</small></span>
+      </div>`,
+  },
+  // 7 · Reminders and widget
+  '7': {
+    bg: 'radial-gradient(120% 90% at 20% 0%, #8A64A0 0%, #6B4A7A 45%, #3E2A49 100%)', color: '#FBF6EE',
+    kicker: 'Promemoria e widget', title: `Ti ricordiamo<br><em>cosa mangiare${squiggle('#E9A020')}</em>.`,
+    sub: 'Una notifica all’ora di ogni pasto, con il menu già scritto. E spunti dal widget.',
+    body: `
+      <div class="notif" style="top: ${wide ? 33 : 43}%; ${wide ? 'left: 18%; right: 18%;' : ''} transform: rotate(-2deg)">
+        <img src="${appIcon}"><div style="flex:1"><div class="meta"><span>NUTRIMY</span><span>ora</span></div>
+        <div class="t">A tavola! È ora di pranzo</div>
+        <div class="b">Oggi c’è: pasta di farro 120 g, salmone affumicato 40 g e asparagi 200 g. Buon appetito!</div></div>
+      </div>
+      <div class="notif" style="top: ${wide ? 51 : 58.5}%; ${wide ? 'left: 22%; right: 14%;' : ''} transform: rotate(2deg); opacity: .96">
+        <img src="${appIcon}"><div style="flex:1"><div class="meta"><span>NUTRIMY</span><span>21:30</span></div>
+        <div class="t">Com’è andata oggi?</div>
+        <div class="b">Mancano 2 spunte: porta la serie a 6 giorni.</div></div>
+      </div>
+      <div class="widget" style="top: ${wide ? 68 : 72}%; ${wide ? 'left: 20%; right: 20%;' : ''} transform: rotate(-1.5deg)">
+        <div class="head"><span>PRANZO · 1/3</span><span>oggi 7/16</span></div>
+        <div class="row"><i class="on">✓</i><s>Pasta di farro</s><span class="q">g 120</span></div>
+        <div class="row"><i></i>Salmone affumicato<span class="q">g 40</span></div>
+        <div class="row"><i></i>Asparagi<span class="q">g 200</span></div>
+      </div>`,
+  },
+};
+
+const p = PANELS[panel];
+// iPad screenshots show the iPad app.
+if (wide) p.body = p.body.replace(/raw\/(oggi|settimana|spesa|pianta|peso)\.png/g, 'raw-ipad/$1.png');
+if (android) p.body = p.body.replace(/raw\/(oggi|settimana|spesa|pianta|peso|scegli-crop)\.png/g, 'raw-android/$1.png');
+document.body.innerHTML = `
+  <div class="canvas" style="background: ${p.bg}; color: ${p.color}">
+    <div class="kicker">${p.kicker}</div>
+    <h1>${p.title}</h1>
+    <p class="sub">${p.sub}</p>
+    ${p.body}
+  </div>`;
+</script>
+</body>
+</html>

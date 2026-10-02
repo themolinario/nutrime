@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NutriMy</title>
+<meta name="description" content="Carica il PDF del nutrizionista: NutriMy lo trasforma in un menu da spuntare ogni giorno e in una lista della spesa già pronta.">
+<style>
+  :root { --bg: #FBF6EE; --text: #1C2B24; --muted: #5E6B64; --green: #1F6B4A; --deep: #174F37; --border: #E7DFD2; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { background: linear-gradient(135deg, var(--deep), var(--green)); color: #fff; padding: 64px 16px 56px; border-radius: 0 0 32px 32px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .brand { color: #B9E3C6; font-weight: 700; letter-spacing: .2em; font-size: 13px; text-transform: uppercase; }
+  h1 { font-family: Georgia, serif; font-size: clamp(34px, 7vw, 48px); line-height: 1.1; margin: 16px 0 12px; }
+  header p { color: #D2E8DA; margin: 0; max-width: 520px; }
+  main { padding: 40px 16px 64px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+  li strong { display: block; }
+  li span { color: var(--muted); }
+  nav { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; font-size: 15px; }
+  a { color: var(--green); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">NutriMy</div>
+    <h1>La tua dieta,<br>finalmente viva.</h1>
+    <p>Carica il PDF del nutrizionista: NutriMy lo trasforma in un menu da spuntare ogni giorno
+    e in una lista della spesa già pronta.</p>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <ul>
+      <li><strong>Oggi</strong><span>Scegli tra gli alimenti previsti e spunta man mano che mangi.</span></li>
+      <li><strong>Settimana</strong><span>I prossimi giorni pianificati in un tocco, con varietà.</span></li>
+      <li><strong>Spesa</strong><span>La lista si scrive da sola, con le quantità sommate e divise per reparto.</span></li>
+      <li><strong>Privato</strong><span>Il PDF viene letto sul telefono. L'account è facoltativo.</span></li>
+    </ul>
+    <nav>
+      <a href="supporto">Supporto</a>
+      <a href="privacy">Privacy</a>
+      <span>© 2026 Marco Molinari</span>
+    </nav>
+  </div>
+</main>
+</body>
+</html>

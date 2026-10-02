@@ -1,0 +1,9 @@
+appId: com.marcomolinari.nutrime
+---
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+# Dinner is the last meal left: ticking it completes the day and the plant blooms.
+- tapOn: { id: 'eat-meal-cena' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 4200, optional: true }
+- scrollUntilVisible: { element: { id: 'plant-badge' }, direction: UP }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }

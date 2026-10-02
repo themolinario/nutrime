@@ -39,3 +39,25 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+ios/
+android/
+
+# Parser fixtures: extracted pages of a real diet PDF, so they carry personal
+# health data. Regenerate locally with scripts/extract.mjs.
+/pages.json
+/scripts/fixture-pages.json
+
+# archive / IPA locali
+/build
+
+# credenziali Supabase locali
+.env.supabase.local
+
+# build locali (si rifanno con eas build --local)
+*.aab
+*.ipa
+*.apk
+
+# materiale video: registrazioni grezze e file intermedi, pesanti e rigenerabili
+/store/marketing/video/clips/
+/store/marketing/video/work/

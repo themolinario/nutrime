@@ -1,0 +1,25 @@
+# The plan screen reports what was read out of the PDF.
+appId: com.marcomolinari.nutrime
+name: 06 · Il piano letto dal PDF
+---
+- launchApp
+- tapOn:
+    id: 'tab-piano'
+- assertVisible:
+    id: 'plan-title'
+- assertVisible: 'Marco Molinari'
+- assertVisible: 'Dott.ssa Loconte Tiziana'
+
+# Each meal expands into the tables and their alternatives.
+- tapOn:
+    id: 'plan-meal-colazione'
+- assertVisible: 'Derivati dei cereali'
+- tapOn:
+    id: 'plan-meal-colazione'
+
+- scrollUntilVisible:
+    element:
+      id: 'plan-reimport'
+    direction: DOWN
+- assertVisible:
+    id: 'plan-delete'

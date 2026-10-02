@@ -1,0 +1,10 @@
+appId: com.marcomolinari.nutrime
+---
+- scrollUntilVisible: { element: { id: 'pick-pranzo-.*' }, direction: DOWN, centerElement: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'pick-pranzo-.*', index: 0 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { point: '50%,27%' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }

@@ -1,0 +1,30 @@
+# Everything lives on the device: choices survive a full restart.
+appId: com.marcomolinari.nutrime
+name: 07 · Persistenza locale
+---
+- launchApp
+- tapOn:
+    id: 'tab-oggi'
+- assertVisible:
+    id: 'chosen-colazione-.*'
+
+- stopApp
+- launchApp
+
+- assertVisible:
+    id: 'tab-oggi'
+- assertVisible:
+    id: 'chosen-colazione-.*'
+
+# The shopping list, including hand-added lines, comes back too.
+- tapOn:
+    id: 'tab-spesa'
+- assertVisible:
+    id: 'shopping-progress'
+- assertVisible:
+    id: 'shop-extra-.*'
+
+# So does the imported plan itself.
+- tapOn:
+    id: 'tab-piano'
+- assertVisible: 'Marco Molinari'

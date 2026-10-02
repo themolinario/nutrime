@@ -1,0 +1,13 @@
+appId: com.marcomolinari.nutrime
+---
+- launchApp
+- tapOn: { id: 'stats-no', optional: true }
+- tapOn: { id: 'developer-banner-close', optional: true }
+- tapOn: { id: 'tab-oggi' }
+- tapOn: { id: 'today-clear' }
+- tapOn: { id: 'today-autofill' }
+- tapOn: { id: 'tab-spesa' }
+- tapOn: { id: 'shopping-reset', optional: true }
+- tapOn: { id: 'tab-settimana' }
+- tapOn: { id: 'week-horizon-7' }
+- tapOn: { id: 'tab-oggi' }

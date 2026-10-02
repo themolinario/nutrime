@@ -1,0 +1,35 @@
+# Plan the next seven days and drill into one of them.
+appId: com.marcomolinari.nutrime
+name: 04 · I sette giorni successivi
+---
+- launchApp
+- tapOn:
+    id: 'tab-settimana'
+- assertVisible:
+    id: 'week-missing'
+- assertVisible:
+    id: 'week-day-0'
+
+- tapOn:
+    id: 'week-autofill'
+- assertVisible:
+    id: 'week-complete'
+- assertVisible: 'Rigenera'
+
+# All seven days are listed, each with its own checklist.
+- scrollUntilVisible:
+    element:
+      id: 'week-day-6'
+    direction: DOWN
+- tapOn:
+    id: 'week-day-6'
+- assertVisible:
+    id: 'day-scroll'
+- assertVisible:
+    id: 'day-autofill'
+- assertVisible:
+    id: 'chosen-.*'
+- tapOn:
+    id: 'day-back'
+- assertVisible:
+    id: 'week-day-6'

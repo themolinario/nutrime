@@ -1,0 +1,49 @@
+# The shopping list is built from the week's picks, and can be ticked and extended.
+appId: com.marcomolinari.nutrime
+name: 05 · Lista della spesa
+---
+- launchApp
+- tapOn:
+    id: 'tab-spesa'
+- assertVisible:
+    id: 'shopping-progress'
+
+# Start from an empty basket however the previous flow left it.
+- tapOn:
+    id: 'shopping-reset'
+    optional: true
+- assertVisible: '0 di [1-9]\d* nel carrello'
+
+# Ticking a line puts it in the basket.
+- tapOn:
+    id: 'shop-.*'
+    index: 0
+- assertVisible: '1 di [1-9]\d* nel carrello'
+- tapOn:
+    id: 'shopping-reset'
+- assertVisible: '0 di [1-9]\d* nel carrello'
+
+# The horizon changes how many days the list covers.
+- tapOn:
+    id: 'horizon-3'
+- assertVisible:
+    id: 'shopping-progress'
+- tapOn:
+    id: 'horizon-7'
+- assertVisible:
+    id: 'shopping-progress'
+
+# Anything else can be added by hand from the docked bar.
+- tapOn:
+    id: 'shopping-add-name'
+- inputText: 'Caffè decaffeinato'
+- tapOn:
+    id: 'shopping-add-qty'
+- inputText: '1 pacco'
+- tapOn:
+    id: 'shopping-add'
+
+# Hand-added lines sit in their own section at the top of the list.
+- assertVisible: 'Aggiunti da te'
+- assertVisible:
+    id: 'shop-extra-.*'

@@ -1,0 +1,16 @@
+appId: com.marcomolinari.nutrime
+---
+- tapOn: { id: 'tab-settimana' }
+- scrollUntilVisible: { element: { id: 'week-horizon-14' }, direction: UP }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'week-horizon-14' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+# "Compila tutto" fills the two weeks in one tap.
+- tapOn: { id: 'week-autofill' }
+- tapOn: { text: 'Solo i mancanti', optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- swipe: { start: '50%,80%', end: '50%,30%', duration: 1500 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- swipe: { start: '50%,80%', end: '50%,40%', duration: 1200 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }

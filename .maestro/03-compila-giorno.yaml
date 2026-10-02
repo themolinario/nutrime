@@ -1,0 +1,32 @@
+# "Compila per me" fills every table of the day in one tap.
+appId: com.marcomolinari.nutrime
+name: 03 · Compila la giornata
+---
+- launchApp
+- tapOn:
+    id: 'tab-oggi'
+- tapOn:
+    id: 'today-autofill'
+
+# Once everything is chosen the button offers to shuffle instead.
+- assertVisible: 'Rigenera scelte'
+- assertVisible:
+    id: 'today-clear'
+- scrollUntilVisible:
+    element:
+      id: 'chosen-pranzo-.*'
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: 'chosen-cena-.*'
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: 'today-progress'
+    direction: UP
+
+# Clearing the day empties it again.
+- tapOn:
+    id: 'today-clear'
+- assertVisible: '0 di \d+ completati, 0 scelti'
+- assertVisible: 'Compila per me'

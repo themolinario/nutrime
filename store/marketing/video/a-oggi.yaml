@@ -1,0 +1,15 @@
+appId: com.marcomolinari.nutrime
+---
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'eat-colazione-.*', index: 0 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'eat-colazione-.*', index: 1 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+# One tap on the meal's circle ticks what's left of it.
+- tapOn: { id: 'eat-meal-colazione' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- swipe: { start: '50%,75%', end: '50%,40%', duration: 900 }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- tapOn: { id: 'eat-meal-meta-mattina' }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }
+- extendedWaitUntil: { visible: { id: "__pause__" }, timeout: 700, optional: true }

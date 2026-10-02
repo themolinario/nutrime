@@ -1,0 +1,5 @@
+appId: com.marcomolinari.nutrime
+---
+- tapOn: { id: 'choose-close', optional: true }
+- tapOn: { id: 'tab-oggi' }
+- scrollUntilVisible: { element: { id: 'today-title' }, direction: UP }

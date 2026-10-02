@@ -1,0 +1,15 @@
+# The flows build on each other: 01 imports the plan the rest depend on, so they
+# must run in order and stop at the first failure.
+flows:
+  - '*.yaml'
+
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 01 · Importa il PDF della dieta
+    - 02 · Scelta di un alimento
+    - 03 · Compila la giornata
+    - 04 · I sette giorni successivi
+    - 05 · Lista della spesa
+    - 06 · Il piano letto dal PDF
+    - 07 · Persistenza locale

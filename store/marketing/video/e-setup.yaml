@@ -1,0 +1,3 @@
+appId: com.marcomolinari.nutrime
+---
+- scrollUntilVisible: { element: { id: 'eat-meal-cena' }, direction: DOWN, centerElement: true }

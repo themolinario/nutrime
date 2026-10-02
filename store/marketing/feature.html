@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Bricolage'; font-weight: 800; src: url('../../node_modules/@expo-google-fonts/bricolage-grotesque/800ExtraBold/BricolageGrotesque_800ExtraBold.ttf'); }
+  @font-face { font-family: 'Figtree'; font-weight: 600; src: url('../../node_modules/@expo-google-fonts/figtree/600SemiBold/Figtree_600SemiBold.ttf'); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1024px; height: 500px; overflow: hidden; }
+  body { font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased; }
+  /* Google Play's feature graphic: 1024×500. Text stays in the middle band, clear of the edges. */
+  .canvas { position: relative; width: 1024px; height: 500px; overflow: hidden; color: #FBF6EE;
+    background: radial-gradient(120% 120% at 85% 15%, #2A8A60 0%, #1F6B4A 38%, #123A29 100%); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(30px); }
+  .text { position: absolute; left: 70px; top: 112px; width: 520px; }
+  .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; font-size: 18px; opacity: .9; }
+  .brand img { width: 48px; height: 48px; border-radius: 12px; }
+  h1 { font-family: 'Bricolage'; font-weight: 800; font-size: 64px; line-height: .98; letter-spacing: -0.035em; margin-top: 18px; }
+  h1 em { font-style: normal; position: relative; white-space: nowrap; }
+  h1 em svg { position: absolute; left: -2%; bottom: -0.16em; width: 104%; height: .32em; overflow: visible; }
+  p { font-size: 22px; margin-top: 18px; opacity: .85; line-height: 1.3; }
+  .phone { position: absolute; width: 230px; aspect-ratio: 1080 / 2400; right: 120px; top: 70px; transform: rotate(6deg);
+    background: #101311; border-radius: 30px; padding: 7px; box-shadow: 0 24px 50px rgba(0,0,0,.35); }
+  .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 24px; display: block; }
+  .phone::after { content: ''; position: absolute; top: 15px; left: 50%; width: 11px; height: 11px; margin-left: -5px; border-radius: 50%; background: #0a0c0b; }
+  .sticker { position: absolute; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; z-index: 2;
+    box-shadow: 0 12px 26px rgba(0,0,0,.25); }
+  .sticker svg { width: 56%; height: 56%; }
+</style>
+</head>
+<body>
+<script src="icons.js"></script>
+<script>
+const squiggle = `<svg viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M3 14 C 40 4, 80 18, 120 9 S 180 6, 197 11" fill="none" stroke="#E9A020" stroke-width="7" stroke-linecap="round"/></svg>`;
+const sticker = (name, color, bg, pos, r) => `<div class="sticker" style="${pos}; transform: rotate(${r}deg); background:${bg}">${icon(name, color)}</div>`;
+const screen = new URLSearchParams(location.search).get('screen') ?? 'raw-android/oggi.png';
+document.body.innerHTML = `<div class="canvas">
+  <div class="blob" style="width:360px; height:360px; background:#3FA673; left:-140px; top:260px; opacity:.5"></div>
+  <div class="blob" style="width:300px; height:300px; background:#E9A020; right:-120px; top:-140px; opacity:.25"></div>
+  <div class="text">
+    <div class="brand"><img src="raw/icon.png">NutriMy</div>
+    <h1>La tua dieta,<br><em>finalmente${squiggle}</em> viva.</h1>
+    <p>Menu da spuntare, lista della spesa<br>e la tua pianta che cresce ogni giorno.</p>
+  </div>
+  <div class="phone"><img src="${screen}"></div>
+  ${sticker('Flower', '#FF5E8E', '#FFE4EC', 'right:330px; top:300px', -10)}
+  ${sticker('CheckCircle', '#E9A020', '#FDF1DC', 'right:56px; top:96px', 12)}
+  ${sticker('ShoppingCart', '#1F6B4A', '#E4F0E8', 'right:70px; top:340px', -8)}
+</div>`;
+</script>
+</body>
+</html>
