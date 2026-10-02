@@ -9,7 +9,10 @@
       "phosphor-react-native/src/icons/*": [
         "./node_modules/phosphor-react-native/lib/typescript/icons/*"
       ]
-    }
+    },
+    "types": [
+      "jest"
+    ]
   },
   "include": [
     "**/*.ts",
