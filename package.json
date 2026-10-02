@@ -46,11 +46,15 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@react-native/jest-preset": "~0.86.3",
+    "@types/jest": "29.5.14",
     "@types/node": "^26.6.2",
     "@types/react": "~19.2.2",
     "esbuild": "^0.28.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.2",
+    "jest": "~29.7.0",
+    "jest-expo": "~57.0.5",
     "pdfjs-dist": "^4.10.38",
     "playwright-core": "^1.63.0",
     "tsx": "^4.23.15",
@@ -68,7 +72,21 @@
     "e2e": "scripts/e2e.sh",
     "e2e:build": "scripts/e2e.sh --build",
     "lint": "expo lint",
-    "stats": "bash scripts/stats.sh"
+    "stats": "bash scripts/stats.sh",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*-test.ts?(x)"
+    ],
+    "setupFiles": [
+      "<rootDir>/jest.setup.ts"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|phosphor-react-native)"
+    ]
+  }
 }
