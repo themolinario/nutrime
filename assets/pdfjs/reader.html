@@ -93,6 +93,13 @@ startxref
           return Math.round(n * 100) / 100;
         }
 
+        /** Tells the host that work is going on, so a long PDF on a slow phone isn't taken for stuck. */
+        function progress(done, total) {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ progress: done, total: total }));
+          }
+        }
+
         async function extract(base64) {
           var binary = atob(base64);
           var bytes = new Uint8Array(binary.length);
@@ -104,6 +111,7 @@ startxref
             isEvalSupported: false,
             verbosity: 0,
           }).promise;
+          progress(0, doc.numPages);
 
           var pages = [];
           var count = Math.min(doc.numPages, MAX_PAGES);
@@ -130,6 +138,7 @@ startxref
               items: items,
             });
             page.cleanup();
+            progress(n, count);
           }
           await doc.destroy();
           return { pages: pages, truncated: doc.numPages > count };
