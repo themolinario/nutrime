@@ -2,10 +2,11 @@
 // App Store Connect API: version + build, Italian texts from store/README.md,
 // screenshots from store/screenshots-v2 and the preview video.
 //
-//   node store/asc/release.mjs <version> <build number> [--submit] [--skip-media]
+//   node store/asc/release.mjs <version> <build number> [--submit] [--skip-media] [--skip-video]
 //
 // Without --submit everything is uploaded but nothing is sent to review;
-// --skip-media keeps the screenshots and videos already uploaded.
+// --skip-media keeps the screenshots and videos already uploaded, --skip-video
+// only the videos.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,6 +19,7 @@ const store = path.join(here, '..');
 const [versionString, buildNumber] = process.argv.slice(2);
 const submit = process.argv.includes('--submit');
 const skipMedia = process.argv.includes('--skip-media');
+const skipVideo = skipMedia || process.argv.includes('--skip-video');
 if (!versionString || !buildNumber) throw new Error('Uso: release.mjs <versione> <build> [--submit]');
 
 const SCREENSHOTS = {
@@ -126,7 +128,7 @@ for (const [type, folder] of skipMedia ? [] : Object.entries(SCREENSHOTS)) {
   log('screenshot', type, ids.length);
 }
 
-for (const type of skipMedia ? [] : PREVIEWS) {
+for (const type of skipVideo ? [] : PREVIEWS) {
   const setId = await setFor('appPreviewSet', 'previewType', type);
   for (const old of await all(`/v1/appPreviewSets/${setId}/appPreviews`)) {
     await api('DELETE', `/v1/appPreviews/${old.id}`);

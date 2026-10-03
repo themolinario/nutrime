@@ -1,7 +1,8 @@
 import { mealsForDate, parseDietPages } from '../../diet/parse';
 import pagesJson from '../../diet/__tests__/fixtures/sample-pages.json';
 import type { PdfPage } from '../../pdf/types';
-import { dayProgress, extrasOf, useDietStore } from '../useDietStore';
+import { EMPTY_GARDEN } from '../../garden';
+import { backupOf, dayProgress, extrasOf, useDietStore } from '../useDietStore';
 
 const TUESDAY = '2026-09-29';
 const plan = parseDietPages(pagesJson as PdfPage[], 'Dieta.pdf');
@@ -61,5 +62,26 @@ describe('weights', () => {
     store().setWeight(TUESDAY, 76.1);
     store().setPlan(plan);
     expect(store().weights[TUESDAY]).toBe(76.1);
+  });
+});
+
+describe('garden', () => {
+  beforeEach(() => store().restoreBackup({ ...backupOf(store()), garden: EMPTY_GARDEN }));
+
+  it('grows one plant at a time and keeps the grown ones, in the backup too', () => {
+    store().sow('crescione', TUESDAY);
+    store().harvest('2026-10-03');
+    expect(store().garden).toEqual({
+      growing: null,
+      grown: [{ species: 'crescione', on: '2026-10-03' }],
+    });
+    expect(backupOf(store()).garden).toBe(store().garden);
+  });
+
+  it('forgets the plant given up, and harvests nothing without one', () => {
+    store().sow('ulivo', TUESDAY);
+    store().uproot();
+    store().harvest(TUESDAY);
+    expect(store().garden).toEqual(EMPTY_GARDEN);
   });
 });

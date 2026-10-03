@@ -2,17 +2,22 @@ import { create } from 'zustand';
 
 import type { IconName } from '../components/Icon';
 import { addDays } from './dates';
+import {
+  growOf,
+  SPECIES,
+  speciesOf,
+  type Growing,
+  type SpecialShow,
+  type SpeciesId,
+} from './garden';
 import type { HistoryDay } from './history';
 
 /**
- * The habit plant. Every fully ticked day makes it grow, up to a flower on the
- * fifth day in a row; from then on it lights up every day, with a special show
- * every five days. Missing one day dries it out, but completing the next one
- * saves it; missing two days in a row starts over from a seed.
+ * The habit plant. Every fully ticked day makes the plant being grown (see
+ * garden.ts) grow, until it is ready for the greenhouse. Missing one day dries
+ * it out, but completing the next one saves it; missing two days in a row
+ * starts it over from a seed.
  */
-
-/** The plant is fully grown from this many days in a row. */
-export const FULL_GROWN = 5;
 
 export type PlantStatus = {
   /** Complete days in the current series, one missed day in between allowed. */
@@ -67,23 +72,35 @@ export function plantStatus(
   return { streak, dry, doneToday };
 }
 
-/** Growth from 0 (bare soil) to {@link FULL_GROWN} (in flower). */
-export function stageOf(streak: number): number {
-  return Math.min(streak, FULL_GROWN);
+/** Where the plant being grown stands on `today`: only the days since it was sown count. */
+export function growingStatus(
+  days: HistoryDay[],
+  today: string,
+  growing: Growing,
+  rest: RestDay = () => false,
+): PlantStatus & { progress: number; grow: number; ready: boolean } {
+  const { days: goal } = speciesOf(growing.species);
+  const status = plantStatus(daysSince(days, growing.since), today, rest);
+  const progress = Math.min(status.streak, goal);
+  return { ...status, progress, grow: growOf(progress, goal), ready: progress >= goal };
 }
 
-export type SpecialShow = 'butterflies' | 'fruits' | 'rainbow' | 'stars';
-const SPECIALS: SpecialShow[] = ['butterflies', 'fruits', 'rainbow', 'stars'];
+function daysSince(days: HistoryDay[], since: string): HistoryDay[] {
+  return days.filter((d) => d.date >= since);
+}
 
 export type Celebration = {
-  streak: number;
-  /** Growth shown at the start and at the end of the animation. */
+  species: SpeciesId;
+  /** Days grown so far, out of `goal`. */
+  progress: number;
+  goal: number;
+  /** Growth shown at the start and at the end of the animation, 0–5. */
   from: number;
   to: number;
   /** Starts dried out and comes back to life. */
   revive: boolean;
-  /** Fully grown and glowing. */
-  lit: boolean;
+  /** Fully grown: it glows and goes to the greenhouse. */
+  grown: boolean;
   special: SpecialShow | null;
   title: string;
   subtitle: string;
@@ -91,77 +108,76 @@ export type Celebration = {
   icon: IconName;
 };
 
-const GROWING: Record<number, [string, string, IconName]> = {
-  1: ['Seme piantato!', 'Prima giornata completa', 'leaf'],
-  2: ['Spunta una fogliolina', '2 giorni di fila, niente male', 'plant'],
-  3: ['Cresce a vista d’occhio', '3 giorni di fila, forza così', 'plant'],
-  4: ['Ecco il bocciolo', '4 giorni: quasi in fiore', 'plant'],
-  5: ['È fiorita!', '5 giorni di fila, che costanza', 'flower'],
-};
-
-const LIT_TITLES = ['Si accende!', 'Brilla di salute', 'Luce piena', 'Più radiosa che mai'];
-const LIT_QUIPS = [
-  'la costanza ti dona',
-  'abitudine sbloccata',
-  'il tuo piano ringrazia',
-  'energia pura',
-  'nessuno ti ferma',
+/** Titles while growing, by how far the drawing has got (below 2, 3, 4, 5). */
+const GROWING: [number, string, IconName][] = [
+  [2, 'Spunta una fogliolina', 'plant'],
+  [3, 'Cresce a vista d’occhio', 'plant'],
+  [4, 'Mette nuove foglie', 'leaf'],
+  [5, 'Ecco il bocciolo', 'plant'],
 ];
 
-const SPECIAL_TEXT: Record<SpecialShow, [string, (n: number) => string, IconName]> = {
-  butterflies: ['Arrivano le farfalle', (n) => `${n} giorni: che giardino!`, 'butterfly'],
-  fruits: ['Frutti maturi!', (n) => `${n} giorni: raccogli i risultati`, 'cherries'],
-  rainbow: ['Arcobaleno!', (n) => `${n} giorni senza mollare`, 'rainbow'],
-  stars: ['Pioggia di stelle', (n) => `${n} giorni: sei leggenda`, 'shooting-star'],
-};
-
-/** What to show once the day `completed` has just been ticked off. */
+/** What to show once the day `completed` has just been ticked off, for the plant being grown. */
 export function celebrationFor(
   days: HistoryDay[],
   completed: string,
+  growing: Growing,
   rest: RestDay = () => false,
 ): Celebration {
-  const { streak } = plantStatus(days, completed, rest);
-  const byDate = new Map(days.map((d) => [d.date, d]));
-  const revive = streak > 1 && !isDone(byDate.get(previousDay(completed, rest)));
+  const species = speciesOf(growing.species);
+  const goal = species.days;
+  const name = species.name.toLowerCase();
+  const mine = daysSince(days, growing.since);
+  const progress = Math.min(plantStatus(mine, completed, rest).streak, goal);
+  const byDate = new Map(mine.map((d) => [d.date, d]));
+  const revive = progress > 1 && !isDone(byDate.get(previousDay(completed, rest)));
   // A fresh seed after a lost series, rather than the very first one.
-  const restart = streak === 1 && days.some((d) => d.date < completed && isDone(d));
-
-  const lit = streak > FULL_GROWN;
-  const special =
-    lit && streak % FULL_GROWN === 0 ? SPECIALS[(streak / FULL_GROWN - 2) % SPECIALS.length] : null;
+  const restart = progress === 1 && mine.some((d) => d.date < completed && isDone(d));
+  const grown = progress >= goal;
+  const to = growOf(progress, goal);
 
   let title: string;
   let subtitle: string;
   let icon: IconName;
-  if (revive) {
+  if (grown) {
+    title = species.grownTitle;
+    subtitle = `${goal} giorni di fila: ${name} nella tua serra`;
+    icon = species.icon;
+  } else if (revive) {
     title = 'Salvata per un pelo!';
-    subtitle = `La serie continua: ${streak} giorni`;
+    subtitle = `La serie continua: ${progress} giorni su ${goal}`;
     icon = 'drop';
   } else if (restart) {
     title = 'Si riparte!';
-    subtitle = 'Nuovo seme, nuova serie';
+    subtitle = `Nuovo seme di ${name}`;
     icon = 'leaf';
-  } else if (special) {
-    const [heading, line, symbol] = SPECIAL_TEXT[special];
-    title = heading;
-    subtitle = line(streak);
-    icon = symbol;
-  } else if (lit) {
-    title = LIT_TITLES[streak % LIT_TITLES.length];
-    subtitle = `${streak} giorni di fila: ${LIT_QUIPS[streak % LIT_QUIPS.length]}`;
+  } else if (progress === 1) {
+    title = 'Seme piantato!';
+    subtitle = `${species.name}: giorno 1 di ${goal}`;
+    icon = 'leaf';
+  } else if (progress === goal - 1) {
+    title = 'Manca un giorno!';
+    subtitle = `Domani ${name} va nella serra`;
     icon = 'sparkles';
+  } else if (goal >= 14 && progress === Math.ceil(goal / 2)) {
+    title = 'A metà strada';
+    subtitle = `${progress} giorni su ${goal}, continua così`;
+    icon = 'flame';
   } else {
-    [title, subtitle, icon] = GROWING[streak] ?? GROWING[1];
+    const [, heading, symbol] = GROWING.find(([below]) => to < below) ?? GROWING[3];
+    title = heading;
+    subtitle = `${progress} giorni su ${goal}`;
+    icon = symbol;
   }
 
   return {
-    streak,
-    from: stageOf(streak - 1),
-    to: stageOf(streak),
+    species: species.id,
+    progress,
+    goal,
+    from: growOf(progress - 1, goal),
+    to,
     revive,
-    lit,
-    special,
+    grown,
+    special: grown ? species.show : null,
     title,
     subtitle,
     icon,
@@ -194,8 +210,15 @@ export function sampleCelebrations(today: string): Celebration[] {
       done: c === 'x' ? 1 : 0,
       total: 1,
     }));
-  const full = (n: number) => 'x'.repeat(n);
-  return ['x', 'xx', 'xxx', 'xxxx', 'xxxxx', full(6), full(10), full(15), full(20), full(25), 'xxx.x', 'xx..x'].map(
-    (pattern) => celebrationFor(series(pattern), today),
-  );
+  const sample = (species: SpeciesId, pattern: string) =>
+    celebrationFor(series(pattern), today, { species, since: addDays(today, -90) });
+  return [
+    sample('girasole', 'x'),
+    sample('girasole', 'xxxx'),
+    sample('girasole', 'x'.repeat(11)),
+    sample('girasole', 'x'.repeat(20)),
+    sample('basilico', 'xxx.x'),
+    sample('basilico', 'xx..x'),
+    ...SPECIES.map((s) => sample(s.id, 'x'.repeat(s.days))),
+  ];
 }

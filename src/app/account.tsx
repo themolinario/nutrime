@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Body, Button, Card, Heading, Muted, Title } from '../components/ui';
@@ -9,6 +9,7 @@ import { authErrorMessage, deleteAccount, signOut, useSession } from '../lib/clo
 import { useDietStore } from '../lib/store/useDietStore';
 import { colors, spacing } from '../theme';
 import { Icon } from '../components/Icon';
+import { showDialog } from '../lib/dialog';
 
 function formatWhen(ms: number | null): string {
   if (!ms) return 'mai';
@@ -30,10 +31,10 @@ export default function AccountScreen() {
     setBusy(label);
     try {
       await action();
-      if (done) Alert.alert(done);
+      if (done) showDialog(done);
     } catch (error) {
       console.warn('NutriMy: operazione account non riuscita', error);
-      Alert.alert('Operazione non riuscita', authErrorMessage(error));
+      showDialog('Operazione non riuscita', authErrorMessage(error));
     } finally {
       setBusy(null);
     }
@@ -43,11 +44,11 @@ export default function AccountScreen() {
     attempt('restore', async () => {
       const backup = await fetchBackup();
       if (!backup) {
-        Alert.alert('Nessun backup', 'Nel cloud non c’è ancora nulla per questo account.');
+        showDialog('Nessun backup', 'Nel cloud non c’è ancora nulla per questo account.');
         return;
       }
       await new Promise<void>((resolve) =>
-        Alert.alert(
+        showDialog(
           'Ripristinare il backup?',
           `I dati sul telefono verranno sostituiti con quelli salvati il ${formatWhen(backup.updatedAt.getTime())}.`,
           [
@@ -66,7 +67,7 @@ export default function AccountScreen() {
     });
 
   const onDelete = () =>
-    Alert.alert(
+    showDialog(
       'Eliminare l’account?',
       'Account e backup online verranno cancellati per sempre. I dati sul telefono restano.',
       [

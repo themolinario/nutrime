@@ -1,9 +1,9 @@
 import * as Application from 'expo-application';
-import { Alert } from 'react-native';
 
 import { backupOf, useDietStore, type BackupData } from '../store/useDietStore';
 import { useSession } from './session';
 import { supabase } from './supabase';
+import { showDialog } from '../dialog';
 
 /** Bump when the shape of {@link BackupData} changes, and migrate on restore. */
 const SCHEMA_VERSION = 1;
@@ -84,7 +84,7 @@ export async function reconcileAfterSignIn(): Promise<void> {
   }
 
   await new Promise<void>((resolve) => {
-    Alert.alert(
+    showDialog(
       'Trovato un backup',
       `Nel cloud c’è un piano salvato il ${formatWhen(cloud.updatedAt)}. Quale vuoi tenere?`,
       [

@@ -7,7 +7,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
 
-import { LEAVES, stemPoint, TOP } from './geometry';
 import { INK, pop, ramp } from './Plant';
 
 /**
@@ -54,7 +53,7 @@ function StarArt({ color = '#FFF1A1' }: { color?: string }) {
   );
 }
 
-/* ── Water drops: a dried plant gets a drink before coming back ─────────── */
+/* ── Water drops: a dried plant gets a drink before coming back ────────── */
 
 function Drop({ time, index }: Timed & { index: number }) {
   const x = 96 + index * 24;
@@ -96,7 +95,7 @@ export function Drops({ time }: Timed) {
   );
 }
 
-/* ── The seed: the first day starts from bare soil ──────────────────────── */
+/* ── The seed: the first day starts from bare soil ─────────────────────── */
 
 export function Seed({ time }: Timed) {
   const style = useAnimatedStyle(() => {
@@ -120,11 +119,13 @@ export function Seed({ time }: Timed) {
   );
 }
 
-/* ── Confetti: petals bursting out of the flower ────────────────────────── */
+/* ── Confetti: petals bursting out of the plant ────────────────────────── */
 
 const CONFETTI_COLORS = ['#FF8FB3', '#FFD23F', '#7BCB52', '#FFFFFF', '#6EC6FF', '#FF9F43'];
 
-function Confetto({ time, index, start }: Timed & { index: number; start: number }) {
+type From = { at: { x: number; y: number } };
+
+function Confetto({ time, index, start, at }: Timed & From & { index: number; start: number }) {
   const angle = (index / 18) * Math.PI * 2 + (index % 3) * 0.2;
   const speed = 90 + (index % 4) * 30;
   const style = useAnimatedStyle(() => {
@@ -142,7 +143,7 @@ function Confetto({ time, index, start }: Timed & { index: number; start: number
   });
   const color = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
   return (
-    <Sprite x={TOP.x} y={TOP.y} size={12} style={style}>
+    <Sprite x={at.x} y={at.y} size={12} style={style}>
       <Svg width="100%" height="100%" viewBox="0 0 12 12">
         {index % 2 ? (
           <Ellipse cx={6} cy={6} rx={3.5} ry={5.5} fill={color} stroke={INK} strokeWidth={1.2} />
@@ -154,17 +155,17 @@ function Confetto({ time, index, start }: Timed & { index: number; start: number
   );
 }
 
-export function Confetti({ time, start }: Timed & { start: number }) {
+export function Confetti({ time, start, at }: Timed & From & { start: number }) {
   return (
     <>
       {Array.from({ length: 18 }, (_, i) => (
-        <Confetto key={i} time={time} index={i} start={start} />
+        <Confetto key={i} time={time} index={i} start={start} at={at} />
       ))}
     </>
   );
 }
 
-/* ── Sparkles twinkling around a lit plant ──────────────────────────────── */
+/* ── Sparkles twinkling around a lit plant ─────────────────────────────── */
 
 const SPARKLES = [
   { x: 40, y: 70, size: 22 },
@@ -207,7 +208,7 @@ export function Sparkles({ time, glow }: Timed & { glow: SharedValue<number> }) 
   );
 }
 
-/* ── Every 10 days: butterflies ─────────────────────────────────────────── */
+/* ── Butterflies ───────────────────────────────────────────────────────── */
 
 const BUTTERFLIES = [
   { wing: '#FFB547', spot: '#FF7A45', from: { x: -120, y: 40 }, cx: 70, cy: 110, phase: 0 },
@@ -261,60 +262,7 @@ export function Butterflies({ time }: Timed) {
   );
 }
 
-/* ── Every 15 days: the plant bears fruit ───────────────────────────────── */
-
-/** Strawberries hang from the tips of the bigger leaves. */
-const FRUITS = LEAVES.filter((leaf) => leaf.stage >= 2).map((leaf, i) => {
-  const base = stemPoint(leaf.at);
-  return { x: base.x + leaf.side * leaf.size * 0.75, y: base.y + 10, delay: i * 130 };
-});
-
-function Fruit({ time, index }: Timed & { index: number }) {
-  const f = FRUITS[index];
-  const style = useAnimatedStyle(() => {
-    const grow = ramp(time.value, 1050 + f.delay, 450);
-    const swing = Math.sin(time.value / 260 + index) * 6 * grow;
-    return {
-      transform: [{ scale: pop(grow) }, { rotate: `${swing}deg` }],
-    };
-  });
-  return (
-    <Sprite x={f.x} y={f.y} size={26} style={[{ transformOrigin: 'center top' }, style]}>
-      <Svg width="100%" height="100%" viewBox="0 0 26 26">
-        <Path
-          d="M13 5 C 22 4, 25 11, 20 18 C 17 22, 15 25, 13 25 C 11 25, 9 22, 6 18 C 1 11, 4 4, 13 5 Z"
-          fill="#FF4D5E"
-          stroke={INK}
-          strokeWidth={1.8}
-        />
-        {[
-          [9, 11],
-          [15, 10],
-          [12, 16],
-          [17, 15],
-          [8, 16],
-          [13, 21],
-        ].map(([cx, cy], i) => (
-          <Ellipse key={i} cx={cx} cy={cy} rx={0.9} ry={1.3} fill="#FFE27A" />
-        ))}
-        <Path d="M7 5 L13 8 L19 5 L15 3 L13 0 L11 3 Z" fill="#58A83A" stroke={INK} strokeWidth={1.4} strokeLinejoin="round" />
-        <Ellipse cx={8.5} cy={9} rx={1.6} ry={2.8} fill="#FFFFFF" opacity={0.55} />
-      </Svg>
-    </Sprite>
-  );
-}
-
-export function Fruits({ time }: Timed) {
-  return (
-    <>
-      {FRUITS.map((_, i) => (
-        <Fruit key={i} time={time} index={i} />
-      ))}
-    </>
-  );
-}
-
-/* ── Every 20 days: a rainbow behind the plant ─────────────────────────── */
+/* ── A rainbow behind the plant ────────────────────────────────────────── */
 
 const BANDS = ['#FF5A5F', '#FF9F43', '#FFD23F', '#7BCB52', '#4DA8FF', '#9B6BFF'];
 const ARC_Y = 214;
@@ -378,7 +326,7 @@ export function Rainbow({ time }: Timed) {
   );
 }
 
-/* ── Every 25 days: a shower of stars ───────────────────────────────────── */
+/* ── A shower of stars ─────────────────────────────────────────────────── */
 
 function FallingStar({ time, index }: Timed & { index: number }) {
   const x = -70 + ((index * 67) % 380);

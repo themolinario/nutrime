@@ -1,9 +1,10 @@
 import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Alert, Share } from 'react-native';
+import { Share } from 'react-native';
 
 import { track } from '../analytics';
+import { showDialog } from '../dialog';
 
 export type ExportContent = {
   /** Title of the choice sheet, e.g. `Condividi il menu`. */
@@ -35,7 +36,7 @@ async function sharePdf({ html, fileName, title }: ExportContent) {
       dialogTitle: title,
     });
   } catch {
-    Alert.alert(
+    showDialog(
       'Esportazione non riuscita',
       'Non sono riuscito a creare il PDF. Riprova tra un attimo.',
     );
@@ -44,7 +45,7 @@ async function sharePdf({ html, fileName, title }: ExportContent) {
 
 /** Asks whether to send the content as a chat message or as a PDF, then shares it. */
 export function showExportMenu(content: ExportContent) {
-  Alert.alert(content.title, undefined, [
+  showDialog(content.title, undefined, [
     {
       text: 'Messaggio (WhatsApp)',
       onPress: () => {

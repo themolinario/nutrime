@@ -1,7 +1,7 @@
 # NutriMy — materiale per Google Play
 
 Tutto quello che serve nella Play Console, pronto da incollare. Lingua predefinita:
-**Italiano (it-IT)**. Package: `com.marcomolinari.nutrime`. Versione **1.4.0**.
+**Italiano (it-IT)**. Package: `com.marcomolinari.nutrime`. Versione **1.5.0**.
 I limiti di caratteri sono tra parentesi. Il materiale per Apple è in `README.md`.
 
 ---
@@ -37,8 +37,8 @@ OGGI: IL MENU DA SPUNTARE
 • «Compila per me» sceglie tutto in un tocco, alternando gli alimenti per variare
 • Aggiungi un alimento fuori piano o modifica la quantità di un giorno
 
-LA TUA PIANTA CRESCE CON TE
-Ogni giornata completata fa crescere la tua pianta: cinque giorni di fila e fiorisce, poi si illumina ogni giorno e ogni cinque giorni ti riserva una sorpresa. Se salti un giorno si secca, ma la salvi completando il giorno dopo.
+LA TUA SERRA CRESCE CON TE
+Scegli una pianta e falla crescere con le giornate completate. Sono dieci, dal crescione pronto in 5 giorni all'ulivo che ne chiede 60: portale a termine per riempire la tua serra e sbloccare le più rare. Se salti un giorno la pianta si secca, ma la salvi completando il giorno dopo.
 
 IL PESO, GIORNO PER GIORNO
 Registra il peso in un tocco e guarda il grafico dell'andamento: ultimo mese, tre mesi, un anno o tutto. Tocca il grafico per leggere ogni pesata.
@@ -142,7 +142,7 @@ contenga `com.google.android.gms.permission.AD_ID`: vedi sezione 4).
 
 ## 4. Build e controlli tecnici
 
-- Build: `NutriMy-1.4.0.aab`, fatta in locale con
+- Build: `NutriMy-1.5.0.aab`, fatta in locale con
   `JAVA_HOME=$(/usr/libexec/java_home -v 17) npx eas-cli build -p android --profile production --local`.
 - Permessi: `app.json › android.blockedPermissions` toglie quelli che le librerie aggiungono ma
   l'app non usa (`SYSTEM_ALERT_WINDOW`, `READ/WRITE_EXTERNAL_STORAGE`). Nessun `AD_ID`, nessuna
@@ -166,6 +166,16 @@ contenga `com.google.android.gms.permission.AD_ID`: vedi sezione 4).
 4. **Produzione**: la prima revisione richiede di solito da qualche giorno a una settimana.
 
 ## 6. Note di rilascio (500)
+
+Versione 1.5.0:
+
+```
+<it-IT>
+Novità: la tua serra. Scegli una pianta tra dieci e falla crescere con le giornate completate, dal crescione in 5 giorni all'ulivo in 60. Portale a termine per riempire la serra e sbloccare le più rare. Ogni pianta ha il suo aspetto e una festa tutta sua. Finestre e conferme ridisegnate nello stile di NutriMy.
+</it-IT>
+```
+
+Versione 1.4.0 (prima versione):
 
 ```
 <it-IT>

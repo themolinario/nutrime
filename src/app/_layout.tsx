@@ -18,6 +18,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DialogHost } from '../components/Dialog';
 import { PlantCelebrationHost } from '../components/plant/PlantCelebration';
 import { TipHost } from '../components/Tip';
 import { useCloudSync } from '../lib/cloud/useCloudSync';
@@ -125,11 +126,13 @@ export default function RootLayout() {
             />
             <Stack.Screen name="cronologia" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="peso" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="serra" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="account" options={MODAL} />
             <Stack.Screen name="sviluppatore" options={MODAL} />
           </Stack>
           <TipHost />
           <PlantCelebrationHost />
+          <DialogHost />
         </PdfReaderProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

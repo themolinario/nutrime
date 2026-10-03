@@ -1,33 +1,32 @@
+import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { todayISO } from '../../lib/dates';
-import { FULL_GROWN, sampleCelebrations, stageOf, useCelebration } from '../../lib/plant';
-import { usePlantStatus } from '../../lib/usePlantCelebrations';
+import type { Species } from '../../lib/garden';
+import { sampleCelebrations, useCelebration } from '../../lib/plant';
+import { useHarvestWhenReady, usePlantStatus } from '../../lib/usePlantCelebrations';
 import { colors, fonts, radius, spacing } from '../../theme';
 import { Icon, type IconName } from '../Icon';
-import { Body, Muted } from '../ui';
-import { BOX, STEM_BY_STAGE, stemPoint } from './geometry';
+import { Body, Muted, ProgressBar } from '../ui';
+import { BOX } from './geometry';
 import { Plant } from './Plant';
-
-/** Where the pot's shadow ends, in the drawing's coordinates. */
-const POT_BOTTOM = 302;
+import { lookOf, type Look } from './species';
 
 const ICON_TINT: Partial<Record<IconName, string>> = { flame: colors.terracotta };
 
 const SLOT = { width: 56, height: 62 };
 
 /**
- * Scale and lift that keep the drawing whole and centred in the badge: a bare pot
- * is small and sits low in its box, a plant in flower fills it.
+ * Scale and lift that keep the drawing whole and centred in a slot: a bare pot
+ * is small and sits low in its box, a grown plant fills it.
  */
-function fitPlant(stage: number) {
-  const top =
-    stage === 0 ? 207 : stage < 4 ? stemPoint(STEM_BY_STAGE[stage]).y - 18 : stage === 4 ? 42 : 20;
-  const height = POT_BOTTOM - top;
-  const scale = Math.min(SLOT.width / BOX.width, SLOT.height / height);
-  return { size: BOX.width * scale, offset: (SLOT.height - height * scale) / 2 - top * scale };
+export function fitPlant(grow: number, look: Look, slot = SLOT) {
+  const top = look.tops[Math.min(5, Math.ceil(grow))];
+  const height = look.pot.bottom - top;
+  const scale = Math.min(slot.width / BOX.width, slot.height / height);
+  return { size: BOX.width * scale, offset: (slot.height - height * scale) / 2 - top * scale };
 }
 
 let preview = 0;
@@ -38,65 +37,83 @@ function playNextSample() {
   useCelebration.getState().show(samples[preview++ % samples.length]);
 }
 
-function copy({
-  streak,
-  dry,
-  doneToday,
-}: {
-  streak: number;
+type Status = {
+  species: Species;
+  progress: number;
   dry: boolean;
   doneToday: boolean;
-}): [IconName, string, string] {
-  if (streak === 0) return ['leaf', 'Pianta il tuo seme', 'Completa la giornata e inizia a crescere'];
-  if (dry) return ['drop', 'Si sta seccando!', 'Completa oggi per salvare la serie'];
-  const days = streak === 1 ? '1 giorno' : `${streak} giorni di fila`;
-  if (doneToday) return ['flame', days, 'Annaffiata anche oggi'];
-  return [
-    'flame',
-    days,
-    streak >= FULL_GROWN ? 'Completa oggi per tenerla accesa' : 'Completa oggi per farla crescere',
-  ];
+  waiting: boolean;
+};
+
+function copy(status: Status | null): [IconName, string, string] {
+  if (!status) return ['plant', 'Scegli cosa coltivare', 'Apri la serra e pianta un seme'];
+  const { species, progress, dry, doneToday, waiting } = status;
+  if (waiting) return ['leaf', `${species.name}: seme pronto`, 'Si comincia domani'];
+  if (progress === 0) {
+    return ['leaf', `${species.name}: seme piantato`, 'Completa la giornata per farlo germogliare'];
+  }
+  if (dry) return ['drop', `${species.name} si sta seccando!`, 'Completa oggi per salvare la serie'];
+  const title = `${species.name} · ${progress} di ${species.days}`;
+  if (doneToday) return ['flame', title, 'Annaffiata anche oggi'];
+  return ['flame', title, 'Completa oggi per farla crescere'];
 }
 
-/** The habit plant as it stands today; a tap replays the last celebration. */
+/** The plant being grown as it stands today; a tap opens the greenhouse. */
 export function PlantBadge() {
   const status = usePlantStatus();
-  const { streak, dry: isDry, replay } = status;
+  const growing = status.growing ? status : null;
+  const isDry = growing?.dry ?? false;
+  const target = growing && !growing.waiting ? growing.grow : 0;
+  useHarvestWhenReady(growing?.ready ?? false, status.today);
 
-  const grow = useSharedValue(stageOf(streak));
+  const grow = useSharedValue(target);
   const dry = useSharedValue(isDry ? 1 : 0);
-  const glow = useSharedValue(streak > FULL_GROWN ? 1 : 0);
+  const glow = useSharedValue(0);
   useEffect(() => {
-    grow.value = withTiming(stageOf(streak), { duration: 600 });
+    grow.value = withTiming(target, { duration: 600 });
     dry.value = withTiming(isDry ? 1 : 0, { duration: 600 });
-    glow.value = withTiming(streak > FULL_GROWN ? 1 : 0, { duration: 600 });
-  }, [streak, isDry, grow, dry, glow]);
+  }, [target, isDry, grow, dry]);
 
-  const [icon, title, subtitle] = copy(status);
-  const fit = fitPlant(stageOf(streak));
+  const [icon, title, subtitle] = copy(growing);
+  const species = growing?.species.id ?? null;
+  const fit = fitPlant(target, lookOf(species));
 
   return (
     <Pressable
-      onPress={streak === 0 || isDry ? undefined : replay}
+      onPress={() => router.push('/serra')}
       onLongPress={__DEV__ ? playNextSample : undefined}
       style={({ pressed }) => [styles.card, isDry && styles.cardDry, pressed && styles.pressed]}
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${subtitle}`}
+      accessibilityHint="Apre la serra"
       testID="plant-badge"
     >
       <View style={styles.plant}>
         <View style={{ transform: [{ translateY: fit.offset }] }}>
           {/* Still: an always-visible drawing animating every frame is too much work for the UI thread on Android. */}
-          <Plant size={fit.size} grow={grow} dry={dry} glow={glow} live={false} />
+          <Plant size={fit.size} grow={grow} dry={dry} glow={glow} species={species} live={false} />
         </View>
       </View>
       <View style={styles.text}>
         <View style={styles.titleRow}>
           <Icon name={icon} size={16} color={isDry ? colors.amber : ICON_TINT[icon] ?? colors.green} />
-          <Body style={styles.title}>{title}</Body>
+          <Body style={styles.title} numberOfLines={1}>
+            {title}
+          </Body>
         </View>
         <Muted>{subtitle}</Muted>
+        {growing && growing.progress > 0 ? (
+          <View style={styles.bar}>
+            <ProgressBar
+              value={growing.progress / growing.species.days}
+              tint={isDry ? colors.amber : colors.green}
+              track={colors.white}
+              height={5}
+            />
+          </View>
+        ) : null}
       </View>
+      <Icon name="chevron-forward" size={16} color={colors.textFaint} />
     </Pressable>
   );
 }
@@ -118,5 +135,6 @@ const styles = StyleSheet.create({
   plant: { ...SLOT, overflow: 'hidden', alignItems: 'center' },
   text: { flex: 1 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontFamily: fonts.bodySemi, fontSize: 15 },
+  title: { fontFamily: fonts.bodySemi, fontSize: 15, flexShrink: 1 },
+  bar: { marginTop: 6 },
 });
